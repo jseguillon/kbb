@@ -1,0 +1,101 @@
+import { Paddle } from './Paddle';
+import { Brick } from './Brick';
+import type { Game as GameClass } from '../engine/Game';
+
+export class Ball {
+  x: number;
+  y: number;
+  radius: number;
+  speed: number;
+  dx: number;
+  dy: number;
+  launched: boolean;
+  isMain: boolean;
+  active: boolean;
+
+  constructor(x: number, y: number, radius: number, isMain: boolean = true) {
+    this.x = x;
+    this.y = y;
+    this.radius = radius;
+    this.speed = 5;
+    this.dx = 0;
+    this.dy = 0;
+    this.launched = false;
+    this.isMain = isMain;
+    this.active = true;
+  }
+
+  launch() {
+    if (!this.launched) {
+      this.launched = true;
+      this.active = true;
+      this.dy = -this.speed;
+      this.dx = this.speed * 0.5 * (Math.random() > 0.5 ? 1 : -1);
+    }
+  }
+
+  update(game: GameClass, canvasHeight: number) {
+    if (!this.launched && game.paddle) {
+      this.x = game.paddle.x + game.paddle.width / 2;
+      this.y = game.paddle.y - this.radius - 2;
+      return;
+    }
+
+    this.x += this.dx;
+    this.y += this.dy;
+
+    if (this.y - this.radius > canvasHeight) {
+      this.active = false;
+    }
+  }
+
+  bounceOffPaddle(paddle: Paddle) {
+    const paddleCenter = paddle.x + paddle.width / 2;
+    const hitPoint = this.x - paddleCenter;
+    const normalizedHit = hitPoint / (paddle.width / 2);
+    
+    const angle = normalizedHit * (Math.PI / 4);
+    
+    this.dx = this.speed * Math.sin(angle);
+    this.dy = -this.speed * Math.cos(angle);
+    
+    this.dy = -Math.abs(this.dy);
+  }
+
+  bounceOffWall(_canvasHeight: number) {
+    this.dx = -this.dx;
+    if (this.y - this.radius < 0) {
+      this.dy = -this.dy;
+    }
+  }
+
+  bounceOffBrick(brick: Brick) {
+    const prevCenterX = this.x - this.dx;
+    const prevCenterY = this.y - this.dy;
+    
+    const wasAbove = prevCenterY + this.radius <= brick.y;
+    const wasBelow = prevCenterY - this.radius >= brick.y + brick.height;
+    const wasLeft = prevCenterX + this.radius <= brick.x;
+    const wasRight = prevCenterX - this.radius >= brick.x + brick.width;
+    
+    if (wasAbove || wasBelow) {
+      this.dy = -this.dy;
+    } else if (wasLeft || wasRight) {
+      this.dx = -this.dx;
+    } else {
+      this.dy = -this.dy;
+    }
+  }
+
+  draw(ctx: CanvasRenderingContext2D) {
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+    ctx.fillStyle = '#ff4444';
+    ctx.shadowColor = '#ff4444';
+    ctx.shadowBlur = 10;
+    ctx.fill();
+    ctx.closePath();
+    
+    ctx.shadowBlur = 0;
+  }
+}
