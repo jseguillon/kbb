@@ -5,25 +5,24 @@ import { Paddle } from '../entities/Paddle';
 
 export class PowerUpManager {
   powerUps: PowerUp[];
-  spawnRate: number;
-  public spawnTimer: number;
-  gameWidth: number;
-  gameHeight: number;
-  private game: Game | null = null;
+  private spawnTimer: number = 0;
+  private spawnRate: number = 5;
   private lastSpawnBrickIndex: number = -1;
+  private canvasWidth: number;
+  private canvasHeight: number;
+  private game: Game;
 
-  constructor(gameWidth: number, gameHeight: number, game: Game | null = null) {
+  constructor(canvasWidth: number, canvasHeight: number, game: Game, spawnRate?: number) {
     this.powerUps = [];
-    this.spawnRate = 5; // Check every 5 bricks destroyed
-    this.spawnTimer = 0;
-    this.gameWidth = gameWidth;
-    this.gameHeight = gameHeight;
-    this.game = game;
+    this.spawnRate = spawnRate ?? 5;
     this.lastSpawnBrickIndex = -1;
+    this.canvasWidth = canvasWidth;
+    this.canvasHeight = canvasHeight;
+    this.game = game;
   }
 
   shouldSpawn(brickIndex: number): boolean {
-    // Reset spawn chance when we move to a new brick
+    // Reset spawn timer when we move to a new brick
     if (brickIndex !== this.lastSpawnBrickIndex) {
       this.spawnTimer = 0;
       this.lastSpawnBrickIndex = brickIndex;
@@ -41,7 +40,7 @@ export class PowerUpManager {
     // Spawn all power-up types at random positions for debug visualization
     const types: PowerUpType[] = ['wide', 'multi', 'laser', 'slow', 'spread'];
     types.forEach(type => {
-      const x = 50 + Math.random() * (this.gameWidth - 100);
+      const x = 50 + Math.random() * (this.getCanvasWidth() - 100);
       const y = 80 + Math.random() * 100;
       this.powerUps.push(new PowerUp(x, y, type, true));
     });
@@ -63,7 +62,7 @@ export class PowerUpManager {
       powerUp.update();
       
       // Remove if off screen
-      if (powerUp.y > this.gameHeight) {
+      if (powerUp.y > this.canvasHeight) {
         powerUp.active = false;
       }
     });
@@ -96,8 +95,16 @@ export class PowerUpManager {
     }
   }
 
-  reset(): void {
+reset(spawnRate?: number): void {
     this.powerUps = [];
     this.spawnTimer = 0;
+    this.lastSpawnBrickIndex = -1;
+    if (spawnRate !== undefined) {
+      this.spawnRate = spawnRate;
+    }
+  }
+
+  getCanvasWidth(): number {
+    return this.canvasWidth;
   }
 }

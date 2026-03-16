@@ -5,6 +5,7 @@ export class GameState {
     PAUSED: 'paused',
     GAMEOVER: 'gameover',
     WIN: 'win',
+    LEVEL_COMPLETE: 'level_complete',
   } as const;
 
   state: typeof GameState.GameStateState[keyof typeof GameState.GameStateState];
@@ -31,5 +32,9 @@ export class GameState {
 
   static createWin(): GameState {
     return new GameState(GameState.GameStateState.WIN);
+  }
+
+  static createLevelComplete(): GameState {
+    return new GameState(GameState.GameStateState.LEVEL_COMPLETE);
   }
 }

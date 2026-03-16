@@ -1,46 +1,53 @@
 import { Brick } from '../entities/Brick';
+import type { LevelConfig } from './LevelManager';
 
 export class BrickManager {
   brickList: Brick[];
-  rows: number;
-  cols: number;
-  padding: number;
-  offsetTop: number;
-  offsetLeft: number;
+  private config: LevelConfig;
 
-  constructor(canvasWidth: number = 800) {
+  constructor(canvasWidth: number = 800, config?: LevelConfig) {
     this.brickList = [];
-    this.rows = 5;
-    this.cols = 8;
-    this.padding = 10;
-    this.offsetTop = 60;
-    this.offsetLeft = 30;
+    this.config = config || this.getDefaultConfig();
     
     this.createBricks(canvasWidth);
   }
 
-  createBricks(width: number) {
-    const availableWidth = width - 2 * this.offsetLeft;
-    const brickWidth = availableWidth / this.cols - this.padding;
-    const brickHeight = 25;
-    
-    const colors = [
-      '#ff0044',
-      '#ff6600',
-      '#ffcc00',
-      '#00cc66',
-      '#0066ff',
-    ];
+  private getDefaultConfig(): LevelConfig {
+    return {
+      rows: 5,
+      cols: 8,
+      offsetTop: 60,
+      offsetLeft: 30,
+      padding: 10,
+      brickHeight: 25,
+      colors: ['#ff0044', '#ff6600', '#ffcc00', '#00cc66', '#0066ff'],
+      ballSpeed: 5,
+      powerUpSpawnRate: 5,
+    };
+  }
 
-    for (let c = 0; c < this.cols; c++) {
-      for (let r = 0; r < this.rows; r++) {
-        const brickX = this.offsetLeft + c * (brickWidth + this.padding);
-        const brickY = this.offsetTop + r * (brickHeight + this.padding);
+  createBricks(width: number) {
+    const availableWidth = width - 2 * this.config.offsetLeft;
+    const brickWidth = availableWidth / this.config.cols - this.config.padding;
+    const brickHeight = this.config.brickHeight;
+    
+    const colors = this.config.colors;
+
+    for (let c = 0; c < this.config.cols; c++) {
+      for (let r = 0; r < this.config.rows; r++) {
+        const brickX = this.config.offsetLeft + c * (brickWidth + this.config.padding);
+        const brickY = this.config.offsetTop + r * (brickHeight + this.config.padding);
         const color = colors[r % colors.length];
         
         this.brickList.push(new Brick(brickX, brickY, brickWidth, brickHeight, color));
       }
     }
+  }
+
+  updateConfig(config: LevelConfig): void {
+    this.config = config;
+    this.brickList = [];
+    this.createBricks(0);
   }
 
   removeBrick(brick: Brick) {

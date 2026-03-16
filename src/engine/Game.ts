@@ -8,6 +8,7 @@ import { Renderer } from '../renderer/Renderer';
 import { InputHandler } from '../utils/InputHandler';
 import { ScoreManager } from '../logic/ScoreManager';
 import { PowerUpManager } from '../logic/PowerUpManager';
+import { LevelManager } from '../logic/LevelManager';
 import type { PowerUpType } from '../entities/PowerUp';
 import { Brick } from '../entities/Brick';
 
@@ -34,6 +35,7 @@ export class Game {
   private inputHandler: InputHandler;
   private scoreManager: ScoreManager;
   private powerUpManager: PowerUpManager;
+  private levelManager: LevelManager | undefined;
   private hasLaser: boolean = false;
   private lasers: Laser[] = [];
   private lastLaserTime: number = 0;
@@ -78,8 +80,11 @@ private resize() {
       this.canvas.height = rect.height;
       this.renderer.setDimensions(rect.width, rect.height);
       this.paddle = new Paddle(this.paddle.x, this.canvas.height - 40, Math.min(100, this.canvas.width * 0.15), 15);
-      this.brickManager = new BrickManager(this.canvas.width);
-      this.powerUpManager = new PowerUpManager(this.canvas.width, this.canvas.height, this);
+      if (!this.levelManager && this.brickManager) {
+        this.levelManager = new LevelManager(0);
+        this.powerUpManager = new PowerUpManager(this.canvas.width, this.canvas.height, this);
+        this.loadLevel(0);
+      }
     }
   }
 
@@ -111,6 +116,15 @@ private resize() {
       case GameState.GameStateState.PAUSED:
         if (e.key === 'Escape') {
           this.gameState = GameState.createPlaying();
+        }
+        break;
+      case GameState.GameStateState.LEVEL_COMPLETE:
+        if (e.key === 'Enter' || e.key === ' ') {
+          this.levelManager!.nextLevel();
+          this.loadLevel(this.levelManager!.getCurrentLevel() - 1);
+          this.balls = [new Ball(this.canvas.width / 2, this.canvas.height - 60, 8, true)];
+          this.gameState = GameState.createPlaying();
+          this.scoreManager.addScore(500);
         }
         break;
       case GameState.GameStateState.GAMEOVER:
@@ -158,13 +172,25 @@ private resize() {
   private startGame() {
     this.gameState = GameState.createPlaying();
     this.paddle = new Paddle(this.canvas.width / 2, this.canvas.height - 40, Math.min(100, this.canvas.width * 0.15), 15);
+    this.levelManager = new LevelManager(0);
+    this.renderer.setTotalLevels(this.levelManager.getTotalLevels());
     this.balls = [new Ball(this.canvas.width / 2, this.canvas.height - 60, 8, true)];
-    this.brickManager = new BrickManager(this.canvas.width);
+    this.loadLevel(0);
     this.scoreManager.reset();
     this.powerUpManager.reset();
     this.hasLaser = false;
     this.lasers = [];
     this.lastLaserTime = 0;
+  }
+
+  private loadLevel(_levelIndex: number): void {
+    const config = this.levelManager!.getCurrentConfig();
+    this.brickManager = new BrickManager(this.canvas.width, config);
+    this.powerUpManager = new PowerUpManager(this.canvas.width, this.canvas.height, this, config.powerUpSpawnRate);
+    this.hasLaser = false;
+    this.lasers = [];
+    this.balls.forEach(ball => (ball.speed = config.ballSpeed));
+    this.renderer.setLevel(this.levelManager!.getCurrentLevel(), this.levelManager!.getTotalLevels());
   }
 
   private launchBalls(): void {
@@ -193,7 +219,7 @@ private resize() {
     this.updateBalls();
 
     if (this.brickManager.brickList.length === 0) {
-      this.gameState = GameState.createWin();
+      this.handleLevelComplete();
     }
 
     this.renderer.setScore(this.scoreManager.getScore());
@@ -360,6 +386,8 @@ private resize() {
       this.balls.forEach(ball => ball.draw(this.renderer.ctx));
       this.drawDebugInfo();
       this.renderer.drawPaused();
+    } else if (this.gameState.state === GameState.GameStateState.LEVEL_COMPLETE) {
+      this.renderer.drawLevelComplete();
     } else if (this.gameState.state === GameState.GameStateState.GAMEOVER) {
       this.renderer.drawGameOver();
     } else if (this.gameState.state === GameState.GameStateState.WIN) {
@@ -379,6 +407,14 @@ private resize() {
     });
 
     this.renderer.ctx.shadowBlur = 0;
+  }
+
+  private handleLevelComplete(): void {
+    if (this.levelManager!.nextLevel()) {
+      this.gameState = GameState.createLevelComplete();
+    } else {
+      this.gameState = GameState.createWin();
+    }
   }
 
   private drawDebugInfo(): void {
@@ -419,7 +455,15 @@ private resize() {
     this.renderer.ctx.font = '14px Arial';
     this.renderer.ctx.textAlign = 'left';
     this.renderer.ctx.fillText(`Power-ups on screen: ${this.powerUpManager.powerUps.length}`, 10, 40);
-    this.renderer.ctx.fillText(`Spawn timer: ${this.powerUpManager.spawnTimer}/${this.powerUpManager.spawnRate}`, 10, 60);
+    this.renderer.ctx.fillText(`Spawn timer: ${this.getSpawnTimer()}/${this.getSpawnRate()}`, 10, 60);
+  }
+
+  private getSpawnTimer(): number {
+    return (this.powerUpManager as any).spawnTimer;
+  }
+
+  private getSpawnRate(): number {
+    return (this.powerUpManager as any).spawnRate;
   }
 
   start() {

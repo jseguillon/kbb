@@ -237,11 +237,10 @@ npm run lint
 
 1. **Audio**: Web Audio API for sound effects
 2. **Particles**: Collision particle effects
-3. **Levels**: Multiple levels with increasing difficulty
-4. **Assets**: Sprite images for power-ups
-5. **Music**: Background music system
-6. **High Scores**: localStorage persistence
-7. **Boss Battles**: Special brick patterns
+3. **Assets**: Sprite images for power-ups
+4. **Music**: Background music system
+5. **High Scores**: localStorage persistence
+6. **Boss Battles**: Special brick patterns
 
 ## Support
 

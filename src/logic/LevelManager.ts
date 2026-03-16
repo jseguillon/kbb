@@ -1,0 +1,108 @@
+export type LevelConfig = {
+  rows: number;
+  cols: number;
+  offsetTop: number;
+  offsetLeft: number;
+  padding: number;
+  brickHeight: number;
+  colors: string[];
+  ballSpeed: number;
+  powerUpSpawnRate: number;
+};
+
+const LEVELS: LevelConfig[] = [
+  {
+    rows: 5,
+    cols: 8,
+    offsetTop: 60,
+    offsetLeft: 30,
+    padding: 10,
+    brickHeight: 25,
+    colors: ['#ff0044', '#ff6600', '#ffcc00', '#00cc66', '#0066ff'],
+    ballSpeed: 5,
+    powerUpSpawnRate: 5,
+  },
+  {
+    rows: 6,
+    cols: 10,
+    offsetTop: 50,
+    offsetLeft: 20,
+    padding: 8,
+    brickHeight: 22,
+    colors: ['#ff0044', '#ff6600', '#ffcc00', '#00cc66', '#0066ff', '#cc00ff'],
+    ballSpeed: 5.5,
+    powerUpSpawnRate: 4,
+  },
+  {
+    rows: 7,
+    cols: 10,
+    offsetTop: 45,
+    offsetLeft: 15,
+    padding: 7,
+    brickHeight: 20,
+    colors: ['#ff3300', '#ff9900', '#ffff00', '#33ff66', '#3399ff', '#cc33ff'],
+    ballSpeed: 6,
+    powerUpSpawnRate: 3,
+  },
+  {
+    rows: 8,
+    cols: 12,
+    offsetTop: 40,
+    offsetLeft: 10,
+    padding: 6,
+    brickHeight: 18,
+    colors: ['#ff0000', '#ff6600', '#ffcc00', '#ffff00', '#00ff66', '#00ccff', '#6666ff', '#cc00ff'],
+    ballSpeed: 6.5,
+    powerUpSpawnRate: 3,
+  },
+  {
+    rows: 9,
+    cols: 12,
+    offsetTop: 35,
+    offsetLeft: 5,
+    padding: 5,
+    brickHeight: 16,
+    colors: ['#ff0000', '#ff4400', '#ff8800', '#ffcc00', '#ffff00', '#00ff44', '#00ccff', '#6666ff', '#cc00ff'],
+    ballSpeed: 7,
+    powerUpSpawnRate: 2,
+  },
+];
+
+export class LevelManager {
+  private levelIndex: number;
+  private configs: LevelConfig[];
+
+  constructor(initialLevel: number = 0) {
+    this.levelIndex = initialLevel;
+    this.configs = LEVELS;
+  }
+
+  getCurrentConfig(): LevelConfig {
+    return this.configs[this.levelIndex % this.configs.length];
+  }
+
+  nextLevel(): boolean {
+    this.levelIndex++;
+    return this.levelIndex < this.configs.length;
+  }
+
+  getCurrentLevel(): number {
+    return this.levelIndex + 1;
+  }
+
+  getTotalLevels(): number {
+    return this.configs.length;
+  }
+
+  reset(): void {
+    this.levelIndex = 0;
+  }
+
+  isLastLevel(): boolean {
+    return this.levelIndex >= this.configs.length - 1;
+  }
+
+  canContinue(): boolean {
+    return this.levelIndex < this.configs.length;
+  }
+}
