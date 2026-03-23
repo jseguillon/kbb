@@ -45,6 +45,8 @@ export class Game {
   private gameSpeed: number = 0.5;
   private speedDisplayTimer: number = 0;
   private speedDisplayValue: string = '';
+  private killedPod: string | null = null;
+  private killedPodTimer: number = 0;
 
   private isRedBrick(color: string): boolean {
     const redColors = ['#ff0044', '#ff3300', '#ff0000', '#ff4400'];
@@ -265,7 +267,12 @@ private resize() {
         this.scoreManager.addScore(10);
         this.trySpawnPowerUp(hitBrick);
         if (this.isRedBrick(hitBrick.color)) {
-          KubernetesService.terminateRandomPod();
+          KubernetesService.terminateRandomPod().then((podName) => {
+            if (podName) {
+              this.killedPod = podName;
+              this.killedPodTimer = Date.now();
+            }
+          });
         }
       }
     });
@@ -318,7 +325,12 @@ private resize() {
         this.scoreManager.addScore(10);
         this.trySpawnPowerUp(hitBrick);
         if (this.isRedBrick(hitBrick.color)) {
-          KubernetesService.terminateRandomPod();
+          KubernetesService.terminateRandomPod().then((podName) => {
+            if (podName) {
+              this.killedPod = podName;
+              this.killedPodTimer = Date.now();
+            }
+          });
         }
       }
     });
@@ -406,6 +418,7 @@ private resize() {
       this.balls.forEach(ball => ball.draw(this.renderer.ctx));
       this.drawLaser();
       this.drawDebugInfo();
+      this.drawKilledPodDisplay();
       this.drawSpeedDisplay();
       this.renderer.drawHUD();
     } else if (this.gameState.state === GameState.GameStateState.PAUSED) {
@@ -414,6 +427,7 @@ private resize() {
       this.paddle.draw(this.renderer.ctx);
       this.balls.forEach(ball => ball.draw(this.renderer.ctx));
       this.drawDebugInfo();
+      this.drawKilledPodDisplay();
       this.drawSpeedDisplay();
       this.renderer.drawPaused();
     } else if (this.gameState.state === GameState.GameStateState.LEVEL_COMPLETE) {
@@ -503,6 +517,35 @@ private resize() {
       this.renderer.ctx.textAlign = 'center';
       this.renderer.ctx.fillText(this.speedDisplayValue, this.renderer.width / 2, 60);
     }
+  }
+
+  private drawKilledPodDisplay(): void {
+    if (!this.killedPod || Date.now() - this.killedPodTimer > 3000) {
+      this.killedPod = null;
+      return;
+    }
+
+    const elapsed = Date.now() - this.killedPodTimer;
+    const progress = elapsed / 3000;
+    const alpha = Math.max(0, 1 - progress);
+    const scale = 1 + Math.sin(progress * Math.PI) * 0.3;
+
+    this.renderer.ctx.save();
+    this.renderer.ctx.translate(this.renderer.width / 2, 60);
+    this.renderer.ctx.scale(scale, scale);
+    this.renderer.ctx.globalAlpha = alpha;
+    this.renderer.ctx.textAlign = 'center';
+
+    const glowColor = `rgba(255, 68, 68, ${alpha})`;
+    const textColor = `rgba(255, 200, 200, ${alpha})`;
+
+    this.renderer.ctx.shadowColor = glowColor;
+    this.renderer.ctx.shadowBlur = 50;
+    this.renderer.ctx.fillStyle = textColor;
+    this.renderer.ctx.font = 'bold 28px monospace';
+    this.renderer.ctx.fillText(`☠️ ${this.killedPod} ☠️`, 0, 0);
+
+    this.renderer.ctx.restore();
   }
 
   start() {

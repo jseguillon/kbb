@@ -9,7 +9,7 @@ build:
 
 run:
 	@echo "Starting frontend..."
-	docker run -d -p 5173:5173 --name vibes5-frontend vibes5-frontend:latest
+	docker run -d -p 4173:4173 --name vibes5-frontend vibes5-frontend:latest
 	@echo "Starting k8s-middleware..."
 	@echo "Note: Requires KUBECONFIG env or mounted kubeconfig"
 	docker run -d \

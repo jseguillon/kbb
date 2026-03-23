@@ -1,7 +1,7 @@
 export class KubernetesService {
   private static readonly API_URL = "http://localhost:3001/api/v1/pod/terminate";
 
-  static async terminateRandomPod(): Promise<void> {
+  static async terminateRandomPod(): Promise<string | null> {
     console.log("K8s: Attempting pod termination");
     try {
       const response = await fetch(this.API_URL, {
@@ -16,15 +16,18 @@ export class KubernetesService {
         console.log(
           `K8s termination failed: ${errorData.message || response.statusText}`,
         );
-        return;
+        return null;
       }
 
       const data = await response.json();
       if (data.success) {
         console.log(`Pod terminated: ${data.pod}`);
+        return data.pod;
       }
+      return null;
     } catch (error) {
       console.log(`K8s termination error: ${error instanceof Error ? error.message : "Unknown error"}`);
+      return null;
     }
   }
 }
