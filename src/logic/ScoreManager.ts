@@ -15,6 +15,10 @@ export class ScoreManager {
     this.lives--;
   }
 
+  addLife() {
+    this.lives++;
+  }
+
   getScore(): number {
     return this.score;
   }

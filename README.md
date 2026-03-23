@@ -33,7 +33,9 @@ A modern, browser-based Arkanoid-style brick breaker game built with Vite, TypeS
 ### Prerequisites
 
 - Node.js 18+ (recommended to use nvm)
+- Go 1.21+ (for K8s middleware)
 - Modern web browser with Canvas support
+- Kubernetes config (~/.kube/config) for K8s middleware
 
 ### Installation
 
@@ -44,8 +46,16 @@ nvm use --lts 2>/dev/null || true
 # Install dependencies
 npm install
 
+# Build K8s middleware (optional, for pod termination feature)
+cd k8s-middleware
+go build -o k8s-middleware main.go
+cd ..
+
 # Start development server
 npm run dev
+
+# Start K8s middleware in another terminal (optional)
+./k8s-middleware
 
 # Build for production
 npm run build

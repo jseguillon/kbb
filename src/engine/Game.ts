@@ -11,6 +11,7 @@ import { PowerUpManager } from '../logic/PowerUpManager';
 import { LevelManager } from '../logic/LevelManager';
 import type { PowerUpType } from '../entities/PowerUp';
 import { Brick } from '../entities/Brick';
+import { KubernetesService } from '../utils/KubernetesService';
 
 interface Laser {
   x: number;
@@ -41,6 +42,11 @@ export class Game {
   private lastLaserTime: number = 0;
   private laserCooldown: number = 200;
   private debugMode: boolean = false;
+
+  private isRedBrick(color: string): boolean {
+    const redColors = ['#ff0044', '#ff3300', '#ff0000', '#ff4400'];
+    return redColors.includes(color);
+  }
 
   get canvasHeight(): number {
     return this.canvas.height;
@@ -245,6 +251,9 @@ private resize() {
         this.brickManager.removeBrick(hitBrick);
         this.scoreManager.addScore(10);
         this.trySpawnPowerUp(hitBrick);
+        if (this.isRedBrick(hitBrick.color)) {
+          KubernetesService.terminateRandomPod();
+        }
       }
     });
 
@@ -295,6 +304,9 @@ private resize() {
         this.brickManager.removeBrick(hitBrick);
         this.scoreManager.addScore(10);
         this.trySpawnPowerUp(hitBrick);
+        if (this.isRedBrick(hitBrick.color)) {
+          KubernetesService.terminateRandomPod();
+        }
       }
     });
   }
@@ -351,6 +363,9 @@ private resize() {
           newBall2.dy = mainBall.dy * 0.5;
           this.balls.push(newBall1, newBall2);
         }
+        break;
+      case 'life':
+        this.scoreManager.addLife();
         break;
       case 'multi':
         if (this.balls.filter(b => b.launched).length < 3) {
