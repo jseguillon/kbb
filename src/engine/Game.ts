@@ -236,7 +236,7 @@ private resize() {
     }
   }
 
-  private update() {
+  private update(_deltaTime: number) {
     if (this.gameState.state !== GameState.GameStateState.PLAYING) return;
 
     this.paddle.update(this.canvas.width, this.gameSpeed);
@@ -274,11 +274,9 @@ private resize() {
         this.scoreManager.addScore(10);
         this.trySpawnPowerUp(hitBrick);
         if (this.isRedBrick(hitBrick.color)) {
-          KubernetesService.terminateRandomPod().then((podName) => {
-            if (podName) {
-              this.killedPod = podName;
-              this.killedPodTimer = Date.now();
-            }
+          KubernetesService.terminateRandomPod((podName) => {
+            this.killedPod = podName;
+            this.killedPodTimer = Date.now();
           });
         }
       }
@@ -332,11 +330,9 @@ private resize() {
         this.scoreManager.addScore(10);
         this.trySpawnPowerUp(hitBrick);
         if (this.isRedBrick(hitBrick.color)) {
-          KubernetesService.terminateRandomPod().then((podName) => {
-            if (podName) {
-              this.killedPod = podName;
-              this.killedPodTimer = Date.now();
-            }
+          KubernetesService.terminateRandomPod((podName: string) => {
+            this.killedPod = podName;
+            this.killedPodTimer = Date.now();
           });
         }
       }
@@ -516,29 +512,25 @@ private resize() {
   }
 
   private drawKilledPodDisplay(): void {
-    if (!this.killedPod || Date.now() - this.killedPodTimer > 3000) {
+    if (!this.killedPod) return;
+
+    const elapsed = Date.now() - this.killedPodTimer;
+    if (elapsed > 3000) {
       this.killedPod = null;
       return;
     }
 
-    const elapsed = Date.now() - this.killedPodTimer;
     const progress = elapsed / 3000;
     const alpha = Math.max(0, 1 - progress);
-    const scale = 1 + Math.sin(progress * Math.PI) * 0.3;
+    const scale = 1 + Math.sin(progress * Math.PI) * 0.2;
 
     this.renderer.ctx.save();
     this.renderer.ctx.translate(this.renderer.width / 2, 60);
     this.renderer.ctx.scale(scale, scale);
-    this.renderer.ctx.globalAlpha = alpha;
     this.renderer.ctx.textAlign = 'center';
 
-    const glowColor = `rgba(255, 68, 68, ${alpha})`;
-    const textColor = `rgba(255, 200, 200, ${alpha})`;
-
-    this.renderer.ctx.shadowColor = glowColor;
-    this.renderer.ctx.shadowBlur = 50;
-    this.renderer.ctx.fillStyle = textColor;
-    this.renderer.ctx.font = 'bold 28px monospace';
+    this.renderer.ctx.fillStyle = `rgba(255, 200, 200, ${alpha})`;
+    this.renderer.ctx.font = 'bold 26px monospace';
     this.renderer.ctx.fillText(`☠️ ${this.killedPod} ☠️`, 0, 0);
 
     this.renderer.ctx.restore();
