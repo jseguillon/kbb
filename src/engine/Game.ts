@@ -349,7 +349,7 @@ private resize() {
     if (this.scoreManager.getLives() <= 0) {
       this.gameState = GameState.createGameOver();
     } else {
-      this.balls = [new Ball(this.canvas.width / 2, this.canvas.height - 60, 8, true)];
+      this.balls = [new Ball(this.paddle.x + this.paddle.width / 2, this.paddle.y - 10, 8, true)];
     }
   }
 
