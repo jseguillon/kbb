@@ -178,6 +178,13 @@ private resize() {
       case GameState.GameStateState.PAUSED:
         this.gameState = GameState.createPlaying();
         break;
+      case GameState.GameStateState.LEVEL_COMPLETE:
+        this.levelManager!.nextLevel();
+        this.loadLevel(this.levelManager!.getCurrentLevel() - 1);
+        this.balls = [new Ball(this.canvas.width / 2, this.canvas.height - 60, 8, true)];
+        this.gameState = GameState.createPlaying();
+        this.scoreManager.addScore(500);
+        break;
       case GameState.GameStateState.GAMEOVER:
       case GameState.GameStateState.WIN:
         this.startGame();
