@@ -107,9 +107,9 @@ private resize() {
         this.paddle.dx = 1;
       } else if (e.key === 'Escape') {
         this.gameState = GameState.createPaused();
-      } else if (e.key === ' ' || e.key === 'Enter') {
-        this.launchBalls();
+      } else if (e.key === ' ') {
         e.preventDefault();
+        this.handleSpacebar();
       } else if (e.key.toLowerCase() === 'd') {
         this.toggleDebugMode();
         e.preventDefault();
@@ -130,7 +130,7 @@ private resize() {
 
     switch (this.gameState.state) {
       case GameState.GameStateState.MENU:
-        if (e.key === 'Enter' || e.key === ' ') {
+        if (e.key === ' ') {
           this.startGame();
         }
         break;
@@ -140,7 +140,7 @@ private resize() {
         }
         break;
       case GameState.GameStateState.LEVEL_COMPLETE:
-        if (e.key === 'Enter' || e.key === ' ') {
+        if (e.key === ' ') {
           this.levelManager!.nextLevel();
           this.loadLevel(this.levelManager!.getCurrentLevel() - 1);
           this.balls = [new Ball(this.canvas.width / 2, this.canvas.height - 60, 8, true)];
@@ -150,7 +150,7 @@ private resize() {
         break;
       case GameState.GameStateState.GAMEOVER:
       case GameState.GameStateState.WIN:
-        if (e.key === 'Enter' || e.key === ' ') {
+        if (e.key === ' ') {
           this.startGame();
         }
         break;
@@ -168,6 +168,10 @@ private resize() {
   }
 
   private handleClick(_e: MouseEvent) {
+    this.handleSpacebar();
+  }
+
+  private handleSpacebar() {
     switch (this.gameState.state) {
       case GameState.GameStateState.MENU:
         this.startGame();

@@ -94,7 +94,7 @@ export class Renderer {
 
     this.ctx.fillStyle = '#ffffff';
     this.ctx.font = '24px Arial';
-    this.ctx.fillText('Press ENTER or CLICK to restart', this.width / 2, this.height / 2 + 30);
+    this.ctx.fillText('Press SPACE or CLICK to restart', this.width / 2, this.height / 2 + 30);
   }
 
   drawLevelComplete() {
@@ -111,7 +111,7 @@ export class Renderer {
     this.ctx.fillText(`Score: ${this.score}`, this.width / 2, this.height / 2 + 10);
 
     this.ctx.font = '24px Arial';
-    this.ctx.fillText('Press ENTER or CLICK to continue', this.width / 2, this.height / 2 + 50);
+    this.ctx.fillText('Press SPACE or CLICK to continue', this.width / 2, this.height / 2 + 50);
   }
 
   drawWin() {
@@ -128,7 +128,7 @@ export class Renderer {
     this.ctx.fillText(`Final Score: ${this.score}`, this.width / 2, this.height / 2 + 10);
 
     this.ctx.font = '24px Arial';
-    this.ctx.fillText('Press ENTER or CLICK to play again', this.width / 2, this.height / 2 + 50);
+    this.ctx.fillText('Press SPACE or CLICK to play again', this.width / 2, this.height / 2 + 50);
   }
 
   drawMenu() {
@@ -183,7 +183,7 @@ export class Renderer {
     this.ctx.font = 'bold 28px Arial';
     this.ctx.shadowColor = '#00ff88';
     this.ctx.shadowBlur = 15;
-    this.ctx.fillText('Press ENTER or CLICK to Start', centerX, startY + 470);
+    this.ctx.fillText('Press SPACE or CLICK to Start', centerX, startY + 470);
     this.ctx.shadowBlur = 0;
   }
 }
