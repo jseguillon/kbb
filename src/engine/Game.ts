@@ -388,7 +388,7 @@ private resize() {
         if (this.balls.filter(b => b.launched).length < 3) {
           const mainBall = this.balls.find(b => b.isMain);
           if (mainBall) {
-            const newBall = new Ball(mainBall.x, mainBall.y, 6, false);
+            const newBall = new Ball(mainBall.x, mainBall.y, mainBall.radius, false);
             newBall.dx = -mainBall.dx * 0.5;
             newBall.dy = mainBall.dy;
             this.balls.push(newBall);
