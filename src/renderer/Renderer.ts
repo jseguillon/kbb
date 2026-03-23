@@ -135,18 +135,55 @@ export class Renderer {
     this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
     this.ctx.fillRect(0, 0, this.width, this.height);
 
-    this.ctx.fillStyle = '#00ff88';
-    this.ctx.font = 'bold 56px Arial';
+    const centerX = this.width / 2;
+    const startY = this.height / 2 - 180;
+
     this.ctx.textAlign = 'center';
-    this.ctx.fillText('ARKANOID', this.width / 2, this.height / 2 - 60);
+
+    this.ctx.fillStyle = '#00ff88';
+    this.ctx.font = 'bold 64px Arial';
+    this.ctx.shadowColor = '#00ff88';
+    this.ctx.shadowBlur = 20;
+    this.ctx.fillText('🎮 ARKANOID', centerX, startY);
+    this.ctx.shadowBlur = 0;
 
     this.ctx.fillStyle = '#ffffff';
-    this.ctx.font = '24px Arial';
-    this.ctx.fillText('Click or Press ENTER to Start', this.width / 2, this.height / 2 + 10);
+    this.ctx.font = 'bold 24px Arial';
+    this.ctx.fillText('Kubernetes Brick Breaker', centerX, startY + 50);
 
     this.ctx.font = '18px Arial';
-    this.ctx.fillStyle = '#aaaaaa';
-    this.ctx.fillText('Use mouse or arrow keys to move', this.width / 2, this.height / 2 + 50);
-    this.ctx.fillText('Click to launch the ball', this.width / 2, this.height / 2 + 80);
+    this.ctx.fillStyle = '#cccccc';
+    this.ctx.fillText('Destroy red bricks to terminate pods!', centerX, startY + 90);
+
+    this.ctx.fillStyle = '#00ccff';
+    this.ctx.font = 'bold 20px Arial';
+    this.ctx.fillText('CONTROLS', centerX, startY + 140);
+
+    this.ctx.fillStyle = '#ffffff';
+    this.ctx.font = '16px Arial';
+    this.ctx.fillText('← → / Arrow Keys : Move paddle', centerX, startY + 180);
+    this.ctx.fillText('Mouse              : Move paddle', centerX, startY + 205);
+    this.ctx.fillText('Space / Click      : Launch ball', centerX, startY + 230);
+    this.ctx.fillText('+ / -              : Adjust game speed', centerX, startY + 255);
+    this.ctx.fillText('ESC                : Pause game', centerX, startY + 280);
+
+    this.ctx.fillStyle = '#ff00ff';
+    this.ctx.font = 'bold 20px Arial';
+    this.ctx.fillText('POWER-UPS', centerX, startY + 330);
+
+    this.ctx.fillStyle = '#00ccff';
+    this.ctx.font = '15px monospace';
+    this.ctx.fillText('W - Wide Paddle   M - Multi Ball', centerX, startY + 370);
+    this.ctx.fillStyle = '#ff4400';
+    this.ctx.fillText('L - Laser         S - Slow Ball', centerX, startY + 390);
+    this.ctx.fillStyle = '#ffcc00';
+    this.ctx.fillText('P - Spread        💚 - Extra Life', centerX, startY + 410);
+
+    this.ctx.fillStyle = '#00ff88';
+    this.ctx.font = 'bold 28px Arial';
+    this.ctx.shadowColor = '#00ff88';
+    this.ctx.shadowBlur = 15;
+    this.ctx.fillText('Press ENTER or CLICK to Start', centerX, startY + 470);
+    this.ctx.shadowBlur = 0;
   }
 }
