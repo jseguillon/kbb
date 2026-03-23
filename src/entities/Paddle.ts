@@ -31,8 +31,7 @@ export class Paddle {
   }
 
   moveTo(x: number, canvas: HTMLCanvasElement) {
-    const rect = canvas.getBoundingClientRect();
-    this.x = x - rect.left - this.width / 2;
+    this.x = x - this.width / 2;
     this.update(canvas.width);
   }
 
