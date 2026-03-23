@@ -374,7 +374,8 @@ private resize() {
         });
         setTimeout(() => {
           this.balls.forEach(ball => {
-            ball.speed = 5;
+            const config = this.levelManager!.getCurrentConfig();
+            ball.speed = config.ballSpeed;
           });
         }, 10000);
         break;
