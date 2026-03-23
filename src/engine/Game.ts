@@ -231,7 +231,7 @@ private resize() {
     if (this.gameState.state !== GameState.GameStateState.PLAYING) return;
 
     this.paddle.update(this.canvas.width, this.gameSpeed);
-    this.powerUpManager.update();
+    this.powerUpManager.update(this.gameSpeed);
     this.powerUpManager.checkPaddleCollision(this.paddle);
 
     this.updateLasers();

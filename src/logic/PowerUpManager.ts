@@ -57,9 +57,9 @@ export class PowerUpManager {
     this.powerUps.push(new PowerUp(x, y, type, false));
   }
 
-  update(): void {
+  update(gameSpeed: number = 1.0): void {
     this.powerUps.forEach(powerUp => {
-      powerUp.update();
+      powerUp.update(gameSpeed);
       
       // Remove if off screen
       if (powerUp.y > this.canvasHeight) {

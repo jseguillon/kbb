@@ -50,8 +50,8 @@ export class PowerUp {
     }
   }
 
-  update() {
-    this.y += this.dy;
+  update(gameSpeed: number = 1.0) {
+    this.y += this.dy * gameSpeed;
   }
 
   draw(ctx: CanvasRenderingContext2D) {
