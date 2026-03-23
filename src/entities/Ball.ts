@@ -35,14 +35,18 @@ export class Ball {
   }
 
   update(game: GameClass, canvasHeight: number) {
+    this.updateWithSpeed(game, canvasHeight, 1.0);
+  }
+
+  updateWithSpeed(game: GameClass, canvasHeight: number, speedMultiplier: number) {
     if (!this.launched && game.paddle) {
       this.x = game.paddle.x + game.paddle.width / 2;
       this.y = game.paddle.y - this.radius - 2;
       return;
     }
 
-    this.x += this.dx;
-    this.y += this.dy;
+    this.x += this.dx * speedMultiplier;
+    this.y += this.dy * speedMultiplier;
 
     if (this.y - this.radius > canvasHeight) {
       this.active = false;

@@ -42,6 +42,9 @@ export class Game {
   private lastLaserTime: number = 0;
   private laserCooldown: number = 200;
   private debugMode: boolean = false;
+  private gameSpeed: number = 0.5;
+  private speedDisplayTimer: number = 0;
+  private speedDisplayValue: string = '';
 
   private isRedBrick(color: string): boolean {
     const redColors = ['#ff0044', '#ff3300', '#ff0000', '#ff4400'];
@@ -107,6 +110,16 @@ private resize() {
         e.preventDefault();
       } else if (e.key.toLowerCase() === 'd') {
         this.toggleDebugMode();
+        e.preventDefault();
+      } else if (e.key === '+' || e.key === '=') {
+        this.gameSpeed = Math.min(this.gameSpeed + 0.25, 3.0);
+        this.speedDisplayValue = `${Math.round(this.gameSpeed * 100)}%`;
+        this.speedDisplayTimer = Date.now();
+        e.preventDefault();
+      } else if (e.key === '-' || e.key === '_') {
+        this.gameSpeed = Math.max(this.gameSpeed - 0.25, 0.25);
+        this.speedDisplayValue = `${Math.round(this.gameSpeed * 100)}%`;
+        this.speedDisplayTimer = Date.now();
         e.preventDefault();
       }
     } else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
@@ -217,7 +230,7 @@ private resize() {
   private update() {
     if (this.gameState.state !== GameState.GameStateState.PLAYING) return;
 
-    this.paddle.update(this.canvas.width);
+    this.paddle.update(this.canvas.width, this.gameSpeed);
     this.powerUpManager.update();
     this.powerUpManager.checkPaddleCollision(this.paddle);
 
@@ -233,7 +246,7 @@ private resize() {
   }
 
   private updateBalls() {
-    this.balls.forEach(ball => ball.update(this, this.canvasHeight));
+    this.balls.forEach(ball => ball.updateWithSpeed(this, this.canvasHeight, this.gameSpeed));
     this.balls = this.balls.filter(ball => ball.active);
 
     this.balls.forEach(ball => {
@@ -393,6 +406,7 @@ private resize() {
       this.balls.forEach(ball => ball.draw(this.renderer.ctx));
       this.drawLaser();
       this.drawDebugInfo();
+      this.drawSpeedDisplay();
       this.renderer.drawHUD();
     } else if (this.gameState.state === GameState.GameStateState.PAUSED) {
       this.brickManager.draw(this.renderer.ctx);
@@ -400,6 +414,7 @@ private resize() {
       this.paddle.draw(this.renderer.ctx);
       this.balls.forEach(ball => ball.draw(this.renderer.ctx));
       this.drawDebugInfo();
+      this.drawSpeedDisplay();
       this.renderer.drawPaused();
     } else if (this.gameState.state === GameState.GameStateState.LEVEL_COMPLETE) {
       this.renderer.drawLevelComplete();
@@ -479,6 +494,15 @@ private resize() {
 
   private getSpawnRate(): number {
     return (this.powerUpManager as any).spawnRate;
+  }
+
+  private drawSpeedDisplay(): void {
+    if (Date.now() - this.speedDisplayTimer < 2000) {
+      this.renderer.ctx.fillStyle = '#00ff00';
+      this.renderer.ctx.font = 'bold 24px Arial';
+      this.renderer.ctx.textAlign = 'center';
+      this.renderer.ctx.fillText(this.speedDisplayValue, this.renderer.width / 2, 60);
+    }
   }
 
   start() {

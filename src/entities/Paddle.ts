@@ -16,8 +16,8 @@ export class Paddle {
     this.speed = 8;
   }
 
-  update(gameWidth: number) {
-    this.x += this.dx * this.speed;
+  update(gameWidth: number, gameSpeed: number = 1.0) {
+    this.x += this.dx * this.speed * gameSpeed;
     
     const maxX = gameWidth - this.width;
     const minX = 0;
