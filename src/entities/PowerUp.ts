@@ -1,4 +1,4 @@
-export type PowerUpType = 'wide' | 'multi' | 'laser' | 'slow' | 'spread' | 'life';
+export type PowerUpType = 'wide' | 'multi' | 'laser' | 'slow' | 'life';
 
 export class PowerUp {
   x: number;
@@ -38,10 +38,6 @@ export class PowerUp {
       case 'slow':
         this.color = '#00ff88';
         this.label = 'S';
-        break;
-      case 'spread':
-        this.color = '#ffcc00';
-        this.label = 'P';
         break;
       case 'life':
         this.color = '#00ff00';

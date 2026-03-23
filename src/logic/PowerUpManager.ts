@@ -38,7 +38,7 @@ export class PowerUpManager {
 
   spawnAllDebug(): void {
     // Spawn all power-up types at random positions for debug visualization
-    const types: PowerUpType[] = ['wide', 'multi', 'laser', 'slow', 'spread', 'life'];
+    const types: PowerUpType[] = ['wide', 'multi', 'laser', 'slow', 'life'];
     types.forEach(type => {
       const x = 50 + Math.random() * (this.getCanvasWidth() - 100);
       const y = 80 + Math.random() * 100;
@@ -52,7 +52,7 @@ export class PowerUpManager {
   }
 
   spawn(x: number, y: number): void {
-    const types: PowerUpType[] = ['wide', 'multi', 'laser', 'slow', 'spread', 'life'];
+    const types: PowerUpType[] = ['wide', 'multi', 'laser', 'slow', 'life'];
     const type = types[Math.floor(Math.random() * types.length)];
     this.powerUps.push(new PowerUp(x, y, type, false));
   }

@@ -384,18 +384,6 @@ private resize() {
           this.hasLaser = false;
         }, 10000);
         break;
-      case 'spread':
-        const mainBall = this.balls.find(b => b.isMain);
-        if (mainBall && mainBall.launched) {
-          const newBall1 = new Ball(mainBall.x, mainBall.y, 6, false);
-          const newBall2 = new Ball(mainBall.x, mainBall.y, 6, false);
-          newBall1.dx = mainBall.dx * 0.7;
-          newBall1.dy = mainBall.dy * 0.7;
-          newBall2.dx = mainBall.dx * 0.5;
-          newBall2.dy = mainBall.dy * 0.5;
-          this.balls.push(newBall1, newBall2);
-        }
-        break;
       case 'life':
         this.scoreManager.addLife();
         break;

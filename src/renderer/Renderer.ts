@@ -176,8 +176,8 @@ export class Renderer {
     this.ctx.fillText('W - Wide Paddle   M - Multi Ball', centerX, startY + 370);
     this.ctx.fillStyle = '#ff4400';
     this.ctx.fillText('L - Laser         S - Slow Ball', centerX, startY + 390);
-    this.ctx.fillStyle = '#ffcc00';
-    this.ctx.fillText('P - Spread        💚 - Extra Life', centerX, startY + 410);
+    this.ctx.fillStyle = '#00ff00';
+    this.ctx.fillText('💚 - Extra Life', centerX, startY + 410);
 
     this.ctx.fillStyle = '#00ff88';
     this.ctx.font = 'bold 28px Arial';
