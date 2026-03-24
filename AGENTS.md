@@ -56,6 +56,21 @@ src/
 └── style.css                # Fullscreen canvas styling
 ```
 
+## Mobile Optimization
+
+### Game Speed
+
+- **Desktop**: Default game speed 0.5 (50%)
+- **Mobile**: Automatic detection via user agent and touch capability
+- **Mobile Speed**: 0.75 (75%) - 25% faster for better mobile gameplay
+- Detection: `navigator.userAgent` regex + `window.matchMedia('(pointer: coarse)')`
+
+### Mobile Controls
+
+- Swipe left/right to move paddle
+- Tap/click to launch ball
+- Touch events use passive listeners for smooth scrolling
+
 ## Key Patterns
 
 ### Game State Machine
@@ -186,22 +201,87 @@ Check browser console for:
 
 ## Build & Deployment
 
+### Local Development (Docker)
+
 ```bash
-# Development (hot reload)
-npm run dev
+# Build images
+make build
 
-# Production build
-npm run build
+# Run locally
+make run
 
-# Preview production build
-npm run preview
-
-# Type check
-npm run typecheck
-
-# Lint (if configured)
-npm run lint
+# Stop and clean
+make stop
+make clean
 ```
+
+### Kubernetes Deployment
+
+```bash
+# Quick start
+make k8s
+
+# Check status
+make k8s-status
+
+# View logs
+kubectl logs -l app=k8s-middleware
+kubectl logs -l app=arkanoid-frontend
+
+# Port forward for testing
+kubectl port-forward svc/arkanoid-frontend 8080:80
+kubectl port-forward svc/k8s-middleware 3001:3001
+
+# Delete deployment
+make k8s-delete
+```
+
+### Docker Files
+
+- `Dockerfile.front` - Frontend with Caddy server
+- `Dockerfile.backend` - Middleware Go binary
+
+### Kubernetes Resources
+
+- `k8s/rbac.yaml` - ServiceAccount, Role, RoleBinding
+- `k8s/middleware-deployment.yaml` - Middleware deployment & service
+- `k8s/frontend-deployment.yaml` - Frontend deployment, service & ingress
+- `Caddyfile` - Caddy server configuration
+
+### Deployment Architecture
+
+```
+┌─────────────────────────────────────────┐
+│          Kubernetes Cluster             │
+│                                         │
+│  ┌──────────────┐     ┌──────────────┐ │
+│  │   Ingress    │────▶│   Frontend   │ │
+│  │  (Port 80)   │     │  (Caddy)     │ │
+│  └──────────────┘     └──────┬───────┘ │
+│                             │          │
+│                             ▼          │
+│                     ┌──────────────┐  │
+│                     │   Middleware │  │
+│                     │   (Go)       │  │
+│                     │  (Port 3001) │  │
+│                     └──────────────┘  │
+│                             │         │
+│                             ▼         │
+│                    ┌──────────────┐  │
+│                    │   K8s API    │  │
+│                    │  (Cluster)   │  │
+│                    └──────────────┘  │
+└─────────────────────────────────────────┘
+```
+
+### RBAC Permissions
+
+Middleware has limited permissions:
+- `pods`: get, list, watch, delete
+- Namespace: `default` only
+- Excludes: `kube-system` namespace
+
+See `k8s/DEPLOYMENT.md` for full documentation.
 
 ## Known Issues & Fixes
 
@@ -250,9 +330,115 @@ For issues:
 3. Check Playwright tests pass
 4. Review AGENTS.md for patterns
 
-## References
+## Kubernetes Deployment
 
-- [Vite Docs](https://vitejs.dev)
-- [Playwright Docs](https://playwright.dev)
-- [Canvas API](https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API)
-- [TypeScript](https://www.typescriptlang.org)
+### Files Created
+
+**Dockerfiles:**
+- `Dockerfile.front` - Multi-stage build with Caddy server
+- `Dockerfile.backend` - Go binary for middleware
+
+**Kubernetes Manifests:**
+- `k8s/rbac.yaml` - ServiceAccount, Role, RoleBinding for pod management
+- `k8s/middleware-deployment.yaml` - Middleware deployment with health checks
+- `k8s/frontend-deployment.yaml` - Frontend deployment, service & ingress
+- `Caddyfile` - Caddy server configuration
+
+**Documentation:**
+- `k8s/DEPLOYMENT.md` - Complete deployment guide
+- `K8S_QUICKSTART.md` - Quick start guide
+- `.env.example` - Environment variables template
+
+### RBAC Security
+
+The middleware has minimal required permissions:
+```yaml
+resources: ["pods"]
+verbs: ["get", "list", "watch", "delete"]
+```
+
+- Only operates in `default` namespace
+- Excludes `kube-system` namespace
+- Cannot modify pod specs or access secrets
+
+### Health Checks
+
+Both deployments include:
+- **Liveness probe**: `/health` endpoint (frontend), `/status` (middleware)
+- **Readiness probe**: `/health` endpoint
+- **Resource limits**: 64-128Mi memory, 50-100m CPU
+
+### Caddy Server Features
+
+- Automatic compression (gzip, br, zstd)
+- CORS headers for API proxy
+- Static file serving from `/app/dist`
+- Health check endpoint at `/health`
+- API proxy to middleware at `/api/v1/pod/terminate`
+
+### Middleware API Endpoints
+
+- `GET /status` - Returns cluster status and running pod count
+- `DELETE /api/v1/pod/terminate` - Terminates random running pod
+
+### Common Operations
+
+```bash
+# Deploy
+make k8s
+
+# Port forward for testing
+kubectl port-forward svc/arkanoid-frontend 8080:80
+
+# Check logs
+kubectl logs -l app=k8s-middleware -f
+
+# Scale manually (if using HPA)
+kubectl scale deployment arkanoid-frontend --replicas=3
+```
+
+### Production Considerations
+
+1. **Kubeconfig Access**: Mount as secret, not ConfigMap
+2. **Image Registry**: Use private registry for production images
+3. **Network Policies**: Restrict middleware access to frontend only
+4. **PodDisruptionBudget**: Ensure high availability during upgrades
+5. **Horizontal Pod Autoscaler**: Scale based on CPU/memory usage
+
+See `k8s/DEPLOYMENT.md` for detailed production guide.
+
+## CI/CD with GitHub Actions
+
+### Workflows
+
+- **`.github/workflows/docker-publish.yml`**: Builds and pushes Docker images to ghcr.io
+- **`.github/workflows/deploy.yml`**: Deploys images to Kubernetes cluster
+
+### Setup Required
+
+1. **Add Kubernetes kubeconfig as secret**:
+   ```bash
+   kubectl config view --minify -o json | base64 -w 0
+   # Add to GitHub Settings > Secrets > KUBECONFIG
+   ```
+
+2. **Triggers**:
+   - Push to `main`/`develop` branches → auto build & deploy
+   - Push of `v*` tags → semantic version tags
+   - Pull requests → build only (no push)
+
+### Manual Deployment
+
+```bash
+# Set GitHub username
+export GITHUB_USER=your-username
+
+# Build and push to ghcr.io
+make ghcr
+
+# Deploy manually
+kubectl set image deployment/arkanoid-frontend frontend=ghcr.io/$GITHUB_USER/arkanoid-frontend:main -n default
+kubectl set image deployment/k8s-middleware middleware=ghcr.io/$GITHUB_USER/k8s-middleware:main -n default
+```
+
+See `.github/workflows/README.md` for detailed guide.
