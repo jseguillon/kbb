@@ -1,0 +1,19 @@
+:80 {
+    root * /app/dist
+    file_server
+    
+    # Enable compression
+    encode zstd br gzip
+    
+    # Cache static assets
+    respond "/assets/*" 301 /{path}
+    header /assets/* Cache-Control "public, max-age=31536000"
+    
+    # API proxy to middleware
+    reverse_proxy /api/v1/pod/terminate localhost:3001 {
+        header Upstream "k8s-middleware"
+    }
+    
+    # Health check endpoint
+    respond /health 200 "OK"
+}

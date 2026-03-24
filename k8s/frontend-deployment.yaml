@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: arkanoid-frontend
+  namespace: default
+  labels:
+    app: arkanoid-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: arkanoid-frontend
+  template:
+    metadata:
+      labels:
+        app: arkanoid-frontend
+    spec:
+      containers:
+      - name: frontend
+        image: arkanoid-frontend:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 80
+          name: http
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "20m"
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 80
+          initialDelaySeconds: 10
+          periodSeconds: 15
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: arkanoid-frontend
+  namespace: default
+  labels:
+    app: arkanoid-frontend
+spec:
+  selector:
+    app: arkanoid-frontend
+  ports:
+  - port: 80
+    targetPort: 80
+    protocol: TCP
+    name: http
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: arkanoid-frontend-ingress
+  namespace: default
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - host: arkanoid.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: arkanoid-frontend
+            port:
+              number: 80

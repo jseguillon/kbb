@@ -1,0 +1,94 @@
+.PHONY: all build build-frontend build-backend deploy deploy-all clean k8s-apply k8s-delete image-tag
+
+# Default target
+all: build
+
+# Build Docker images
+build: build-frontend build-backend
+
+build-frontend:
+	@echo "Building frontend Docker image..."
+	docker build -f Dockerfile.front -t $(DOCKER_REGISTRY)$(FRONTEND_IMAGE_NAME):latest .
+
+build-backend:
+	@echo "Building middleware Docker image..."
+	docker build -f Dockerfile.backend -t $(DOCKER_REGISTRY)$(MIDDLEWARE_IMAGE_NAME):latest .
+
+# Tag images for registry
+image-tag:
+	@if [ -n "$(DOCKER_REGISTRY)" ]; then \
+		docker tag $(FRONTEND_IMAGE_NAME):latest $(DOCKER_REGISTRY)$(FRONTEND_IMAGE_NAME):latest; \
+		docker tag $(MIDDLEWARE_IMAGE_NAME):latest $(DOCKER_REGISTRY)$(MIDDLEWARE_IMAGE_NAME):latest; \
+		echo "Images tagged with registry: $(DOCKER_REGISTRY)"; \
+	fi
+
+# Apply Kubernetes manifests
+k8s-apply:
+	@echo "Applying Kubernetes manifests to namespace: $(K8S_NAMESPACE)..."
+	kubectl apply -f k8s/rbac.yaml -n $(K8S_NAMESPACE)
+	kubectl apply -f k8s/middleware-deployment.yaml -n $(K8S_NAMESPACE)
+	kubectl apply -f k8s/frontend-deployment.yaml -n $(K8S_NAMESPACE)
+
+# Deploy all (build + k8s apply)
+deploy: build k8s-apply
+	@echo "Deployment complete!"
+
+deploy-all: build image-tag k8s-apply
+	@echo "Full deployment with registry images complete!"
+
+# Delete all Kubernetes resources
+k8s-delete:
+	@echo "Deleting Kubernetes resources from namespace: $(K8S_NAMESPACE)..."
+	kubectl delete -f k8s/frontend-deployment.yaml -n $(K8S_NAMESPACE) --ignore-not-found
+	kubectl delete -f k8s/middleware-deployment.yaml -n $(K8S_NAMESPACE) --ignore-not-found
+	kubectl delete -f k8s/rbac.yaml -n $(K8S_NAMESPACE) --ignore-not-found
+	@echo "Resources deleted!"
+
+# Clean Docker images
+clean:
+	@echo "Cleaning Docker images..."
+	docker rmi $(DOCKER_REGISTRY)$(FRONTEND_IMAGE_NAME):latest 2>/dev/null || true
+	docker rmi $(DOCKER_REGISTRY)$(MIDDLEWARE_IMAGE_NAME):latest 2>/dev/null || true
+	@echo "Clean complete!"
+
+# Setup kubeconfig secret (for production use)
+k8s-setup-kubeconfig:
+	@echo "Creating kubeconfig secret..."
+	kubectl create secret generic kubeconfig-secret \
+		--from-file=config=$(KUBECONFIG) \
+		-n $(K8S_NAMESPACE) \
+		--dry-run=client -o yaml | kubectl apply -f -
+
+# Port forward middleware for local testing
+port-forward-middleware:
+	kubectl port-forward svc/k8s-middleware 3001:3001 -n $(K8S_NAMESPACE)
+
+# Port forward frontend for local testing
+port-forward-frontend:
+	kubectl port-forward svc/arkanoid-frontend 8080:80 -n $(K8S_NAMESPACE)
+
+# View middleware logs
+logs-middleware:
+	kubectl logs -l app=k8s-middleware -n $(K8S_NAMESPACE) --tail=100
+
+# View frontend logs
+logs-frontend:
+	kubectl logs -l app=arkanoid-frontend -n $(K8S_NAMESPACE) --tail=100
+
+# Check deployment status
+status:
+	@echo "=== Deployment Status ==="
+	kubectl get deployments -n $(K8S_NAMESPACE)
+	kubectl get services -n $(K8S_NAMESPACE)
+	kubectl get pods -n $(K8S_NAMESPACE)
+	@echo "=== RBAC ==="
+	kubectl get serviceaccounts -n $(K8S_NAMESPACE) | grep middleware
+	kubectl get roles,rolebindings -n $(K8S_NAMESPACE) | grep middleware
+
+# Health check
+health:
+	@echo "Checking middleware health..."
+	curl -s http://localhost:3001/status | jq .
+	@echo ""
+	@echo "Checking frontend health..."
+	curl -s http://localhost:8080/health

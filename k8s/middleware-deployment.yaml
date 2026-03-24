@@ -1,0 +1,88 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: k8s-middleware
+  namespace: default
+  labels:
+    app: k8s-middleware
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: k8s-middleware
+  template:
+    metadata:
+      labels:
+        app: k8s-middleware
+    spec:
+      serviceAccountName: k8s-middleware-sa
+      containers:
+      - name: middleware
+        image: k8s-middleware:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 3001
+          name: http
+        env:
+        - name: PORT
+          value: "3001"
+        - name: KUBECONFIG
+          value: "/root/.kube/config"
+        volumeMounts:
+        - name: kubeconfig
+          mountPath: /root/.kube/config
+          subPath: config
+        resources:
+          requests:
+            memory: "32Mi"
+            cpu: "10m"
+          limits:
+            memory: "64Mi"
+            cpu: "50m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3001
+          initialDelaySeconds: 10
+          periodSeconds: 15
+        readinessProbe:
+          httpGet:
+            path: /status
+            port: 3001
+          initialDelaySeconds: 5
+          periodSeconds: 10
+      volumes:
+      - name: kubeconfig
+        configMap:
+          name: kubeconfig-configmap
+          items:
+          - key: config
+            path: config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: k8s-middleware
+  namespace: default
+  labels:
+    app: k8s-middleware
+spec:
+  selector:
+    app: k8s-middleware
+  ports:
+  - port: 3001
+    targetPort: 3001
+    protocol: TCP
+    name: http
+  type: ClusterIP
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kubeconfig-configmap
+  namespace: default
+data:
+  config: |
+    # KUBECONFIG will be mounted from external source
+    # This is a placeholder - actual config is mounted via volume
+    # Users should create a secret or use external volume mount

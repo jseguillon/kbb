@@ -1,0 +1,122 @@
+name: Deploy to Kubernetes
+
+on:
+  workflow_run:
+    workflows: ["Build and Push to ghcr.io"]
+    branches:
+      - main
+    types:
+      - completed
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'development'
+        type: choice
+        options:
+          - development
+          - staging
+          - production
+      namespace:
+        description: 'Kubernetes namespace'
+        required: true
+        default: 'default'
+        type: string
+      frontend_tag:
+        description: 'Frontend image tag (optional)'
+        required: false
+        type: string
+      middleware_tag:
+        description: 'Middleware image tag (optional)'
+        required: false
+        type: string
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME_FRONTEND: ${{ github.repository }}/frontend
+  IMAGE_NAME_MIDDLEWARE: ${{ github.repository }}/middleware
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'latest'
+
+      - name: Configure kubeconfig
+        run: |
+          mkdir -p $HOME/.kube
+          echo "${{ secrets.KUBECONFIG }}" | base64 -d > $HOME/.kube/config
+          export KUBECONFIG=$HOME/.kube/config
+
+      - name: Set image tags
+        id: tags
+        run: |
+          if [ -n "${{ github.event.inputs.frontend_tag }}" ]; then
+            echo "FRONTEND_TAG=${{ github.event.inputs.frontend_tag }}" >> $GITHUB_OUTPUT
+          elif [ -n "${{ github.ref }}" ]; then
+            if [[ "${{ github.ref }}" == "refs/tags/"* ]]; then
+              echo "FRONTEND_TAG=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+            else
+              echo "FRONTEND_TAG=${{ github.sha }}" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "FRONTEND_TAG=main" >> $GITHUB_OUTPUT
+          fi
+
+          if [ -n "${{ github.event.inputs.middleware_tag }}" ]; then
+            echo "MIDDLEWARE_TAG=${{ github.event.inputs.middleware_tag }}" >> $GITHUB_OUTPUT
+          else
+            echo "MIDDLEWARE_TAG=${{ steps.tags.outputs.FRONTEND_TAG }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Pull and update frontend image
+        run: |
+          DOCKER_REGISTRY=${{ env.REGISTRY }}
+          IMAGE_NAME=${{ env.IMAGE_NAME_FRONTEND }}
+          TAG=${{ steps.tags.outputs.FRONTEND_TAG }}
+          
+          echo "Updating frontend deployment with image: ${DOCKER_REGISTRY}/${IMAGE_NAME}:${TAG}"
+          
+          kubectl set image deployment/arkanoid-frontend frontend=${DOCKER_REGISTRY}/${IMAGE_NAME}:${TAG} \
+            -n ${{ github.event.inputs.namespace || 'default' }} \
+            --record
+
+      - name: Pull and update middleware image
+        run: |
+          DOCKER_REGISTRY=${{ env.REGISTRY }}
+          IMAGE_NAME=${{ env.IMAGE_NAME_MIDDLEWARE }}
+          TAG=${{ steps.tags.outputs.MIDDLEWARE_TAG }}
+          
+          echo "Updating middleware deployment with image: ${DOCKER_REGISTRY}/${IMAGE_NAME}:${TAG}"
+          
+          kubectl set image deployment/k8s-middleware middleware=${DOCKER_REGISTRY}/${IMAGE_NAME}:${TAG} \
+            -n ${{ github.event.inputs.namespace || 'default' }} \
+            --record
+
+      - name: Wait for rollout
+        run: |
+          kubectl rollout status deployment/arkanoid-frontend \
+            -n ${{ github.event.inputs.namespace || 'default' }} \
+            --timeout=300s
+          
+          kubectl rollout status deployment/k8s-middleware \
+            -n ${{ github.event.inputs.namespace || 'default' }} \
+            --timeout=300s
+
+      - name: Check deployment status
+        run: |
+          kubectl get pods -n ${{ github.event.inputs.namespace || 'default' }}
+          kubectl get deployments -n ${{ github.event.inputs.namespace || 'default' }}
+
+      - name: Verify health
+        run: |
+          echo "Waiting for pods to be ready..."
+          kubectl wait --for=condition=Ready pods --all -n ${{ github.event.inputs.namespace || 'default' }} --timeout=120s
+          echo "All pods are ready!"
