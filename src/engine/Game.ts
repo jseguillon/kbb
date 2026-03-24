@@ -123,6 +123,12 @@ private resize() {
         this.speedDisplayValue = `${Math.round(this.gameSpeed * 100)}%`;
         this.speedDisplayTimer = Date.now();
         e.preventDefault();
+      } else if (e.key.toLowerCase() === 'n') {
+        this.levelManager!.nextLevel();
+        this.loadLevel(this.levelManager!.getCurrentLevel() - 1);
+        this.balls = [new Ball(this.paddle.x + this.paddle.width / 2, this.paddle.y - 10, 8, true)];
+        this.scoreManager.addScore(500);
+        e.preventDefault();
       }
     } else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
       e.preventDefault();
