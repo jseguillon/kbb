@@ -47,6 +47,10 @@ export class Game {
   private speedDisplayValue: string = '';
   private killedPod: string | null = null;
   private killedPodTimer: number = 0;
+  private statusRefreshInterval: number | null = null;
+  private touchStartX: number = 0;
+  private lastTouchX: number = 0;
+  private isMobile: boolean = false;
 
   private isRedBrick(color: string): boolean {
     const redColors = ['#ff0044', '#ff3300', '#ff0000', '#ff4400'];
@@ -74,11 +78,17 @@ export class Game {
 
     this.gameLoop = new GameLoop(this.update.bind(this), this.draw.bind(this));
     
+    this.isMobile = this.detectMobile();
+    this.gameSpeed = this.isMobile ? 0.75 : 0.5;
+
     this.inputHandler.addEventListener('keydown', ((e: Event) => this.handleKeydown(e as KeyboardEvent)) as EventListener);
     this.inputHandler.addEventListener('keyup', ((e: Event) => this.handleKeyup(e as KeyboardEvent)) as EventListener);
     this.inputHandler.addEventListener('mousedown', ((e: Event) => this.handleClick(e as MouseEvent)) as EventListener);
+    canvas.addEventListener('touchend', (e: Event) => this.handleTouchEnd(e as TouchEvent), { passive: false });
     
     canvas.addEventListener('mousemove', (e: MouseEvent) => this.handleMouseMove(e));
+    canvas.addEventListener('touchstart', (e: Event) => this.handleTouchStart(e as TouchEvent), { passive: false });
+    canvas.addEventListener('touchmove', (e: Event) => this.handleTouchMove(e as TouchEvent), { passive: false });
     
     this.resize();
     window.addEventListener('resize', () => this.resize());
@@ -147,7 +157,6 @@ private resize() {
         break;
       case GameState.GameStateState.LEVEL_COMPLETE:
         if (e.key === ' ') {
-          this.levelManager!.nextLevel();
           this.loadLevel(this.levelManager!.getCurrentLevel() - 1);
           this.balls = [new Ball(this.canvas.width / 2, this.canvas.height - 60, 8, true)];
           this.gameState = GameState.createPlaying();
@@ -189,7 +198,6 @@ private resize() {
         this.gameState = GameState.createPlaying();
         break;
       case GameState.GameStateState.LEVEL_COMPLETE:
-        this.levelManager!.nextLevel();
         this.loadLevel(this.levelManager!.getCurrentLevel() - 1);
         this.balls = [new Ball(this.canvas.width / 2, this.canvas.height - 60, 8, true)];
         this.gameState = GameState.createPlaying();
@@ -205,6 +213,37 @@ private resize() {
   private handleMouseMove(e: MouseEvent) {
     const mouseX = e.clientX - this.canvas.getBoundingClientRect().left;
     this.paddle.moveTo(mouseX, this.canvas);
+  }
+
+  private handleTouchStart(e: TouchEvent): void {
+    e.preventDefault();
+    const touch = e.touches[0];
+    if (!touch) return;
+    const rect = this.canvas.getBoundingClientRect();
+    this.touchStartX = touch.clientX - rect.left;
+    this.lastTouchX = this.touchStartX;
+  }
+
+  private handleTouchMove(e: TouchEvent): void {
+    e.preventDefault();
+    const touch = e.touches[0];
+    if (!touch) return;
+    const rect = this.canvas.getBoundingClientRect();
+    const touchX = touch.clientX - rect.left;
+    const deltaX = touchX - this.lastTouchX;
+    this.lastTouchX = touchX;
+    this.paddle.x += deltaX;
+    this.paddle.x = Math.max(0, Math.min(this.canvas.width, this.paddle.x));
+  }
+
+  private handleTouchEnd(e: TouchEvent): void {
+    e.preventDefault();
+    this.handleSpacebar();
+  }
+
+  private detectMobile(): boolean {
+    const mobileRegex = /Mobile|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i;
+    return mobileRegex.test(navigator.userAgent) || window.matchMedia('(pointer: coarse)').matches;
   }
 
   private startGame() {
@@ -359,6 +398,7 @@ private resize() {
 
   private checkAllBallsLost(): void {
     this.scoreManager.removeLife();
+    this.paddle.triggerEffect();
     
     if (this.scoreManager.getLives() <= 0) {
       this.gameState = GameState.createGameOver();
@@ -420,7 +460,9 @@ private resize() {
     this.renderer.clear();
 
     if (this.gameState.state === GameState.GameStateState.MENU) {
-      this.renderer.drawMenu();
+      this.renderer.drawMenu(this).catch(() => {
+        this.renderer.drawMenuPlaceholder();
+      });
     } else if (this.gameState.state === GameState.GameStateState.PLAYING) {
       this.brickManager.draw(this.renderer.ctx);
       this.powerUpManager.draw(this.renderer.ctx);
@@ -556,9 +598,28 @@ private resize() {
 
   start() {
     this.gameLoop.start();
+    this.refreshStatus();
+    this.statusRefreshInterval = window.setInterval(() => this.refreshStatus(), 5000);
   }
 
   stop() {
     this.gameLoop.stop();
+    if (this.statusRefreshInterval) {
+      clearInterval(this.statusRefreshInterval);
+      this.statusRefreshInterval = null;
+    }
+  }
+
+  private async refreshStatus() {
+    await KubernetesService.checkStatus();
+  }
+
+  async checkStatus(): Promise<{
+    middleware: string;
+    k8s: string;
+    message: string;
+    runningPods: number;
+  } | null> {
+    return KubernetesService.checkStatus();
   }
 }

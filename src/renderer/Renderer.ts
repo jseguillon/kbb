@@ -131,7 +131,7 @@ export class Renderer {
     this.ctx.fillText('Press SPACE or CLICK to play again', this.width / 2, this.height / 2 + 50);
   }
 
-  drawMenu() {
+  async drawMenu(game: any) {
     this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
     this.ctx.fillRect(0, 0, this.width, this.height);
 
@@ -144,48 +144,105 @@ export class Renderer {
     this.ctx.font = 'bold 64px Arial';
     this.ctx.shadowColor = '#00ff88';
     this.ctx.shadowBlur = 20;
-    this.ctx.fillText('🎮 ARKANOID', centerX, startY);
+    this.ctx.fillText('🎮 KUBERNOID', centerX, startY);
     this.ctx.shadowBlur = 0;
 
     this.ctx.fillStyle = '#ffffff';
     this.ctx.font = 'bold 24px Arial';
     this.ctx.fillText('Kubernetes Brick Breaker', centerX, startY + 50);
 
+    const status = await game.checkStatus();
+    this.drawStatusIndicator(centerX, startY + 90, status);
+
     this.ctx.font = '18px Arial';
     this.ctx.fillStyle = '#cccccc';
-    this.ctx.fillText('Destroy red bricks to terminate pods!', centerX, startY + 90);
+    this.ctx.fillText('Destroy red bricks to terminate pods on your cluster!', centerX, startY + 125);
 
     this.ctx.fillStyle = '#00ccff';
     this.ctx.font = 'bold 20px Arial';
-    this.ctx.fillText('CONTROLS', centerX, startY + 140);
+    this.ctx.fillText('CONTROLS', centerX, startY + 160);
 
-    this.ctx.fillStyle = '#ffffff';
-    this.ctx.font = '15px monospace';
-    this.ctx.textAlign = 'left';
-    this.ctx.fillText('← → / Arrow Keys  : Move paddle', centerX - 150, startY + 180);
-    this.ctx.fillText('Mouse             : Move paddle', centerX - 150, startY + 202);
-    this.ctx.fillText('Space / Click     : Launch ball', centerX - 150, startY + 224);
-    this.ctx.fillText('+ / -             : Adjust game speed', centerX - 150, startY + 246);
-    this.ctx.fillText('ESC               : Pause game', centerX - 150, startY + 268);
+    const isMobile = game.isMobile;
+    let controlsEndY = 0;
+    if (isMobile) {
+      this.ctx.fillStyle = '#ffffff';
+      this.ctx.font = '15px monospace';
+      this.ctx.textAlign = 'left';
+      this.ctx.fillText('Swipe left/right  : Move paddle', centerX - 150, startY + 180);
+      this.ctx.fillText('Tap               : Launch ball', centerX - 150, startY + 202);
+      controlsEndY = startY + 202;
+    } else {
+      this.ctx.fillStyle = '#ffffff';
+      this.ctx.font = '15px monospace';
+      this.ctx.textAlign = 'left';
+      this.ctx.fillText('← → / Arrow Keys  : Move paddle', centerX - 150, startY + 180);
+      this.ctx.fillText('Mouse             : Move paddle', centerX - 150, startY + 202);
+      this.ctx.fillText('Space / Click     : Launch ball', centerX - 150, startY + 224);
+      this.ctx.fillText('+ / -             : Adjust game speed', centerX - 150, startY + 246);
+      this.ctx.fillText('ESC               : Pause game', centerX - 150, startY + 268);
+      controlsEndY = startY + 268;
+    }
     this.ctx.textAlign = 'center';
 
+    const powerUpsY = isMobile ? controlsEndY + 60 : controlsEndY + 82;
+    
     this.ctx.fillStyle = '#ff00ff';
     this.ctx.font = 'bold 20px Arial';
-    this.ctx.fillText('POWER-UPS', centerX, startY + 330);
+    this.ctx.fillText('POWER-UPS', centerX, powerUpsY);
 
     this.ctx.fillStyle = '#00ccff';
     this.ctx.font = '15px monospace';
-    this.ctx.fillText('W - Wide Paddle   M - Multi Ball', centerX, startY + 370);
+    this.ctx.fillText('W - Wide Paddle   M - Multi Ball', centerX, powerUpsY + 20);
     this.ctx.fillStyle = '#ff4400';
-    this.ctx.fillText('L - Laser         S - Slow Ball', centerX, startY + 390);
+    this.ctx.fillText('L - Laser         S - Slow Ball', centerX, powerUpsY + 40);
     this.ctx.fillStyle = '#00ff00';
-    this.ctx.fillText('💚 - Extra Life', centerX, startY + 410);
+    this.ctx.fillText('💚 - Extra Life', centerX, powerUpsY + 60);
 
     this.ctx.fillStyle = '#00ff88';
     this.ctx.font = 'bold 28px Arial';
     this.ctx.shadowColor = '#00ff88';
     this.ctx.shadowBlur = 15;
-    this.ctx.fillText('Press SPACE or CLICK to Start', centerX, startY + 470);
+    this.ctx.fillText(isMobile ? 'Tap to Start' : 'Press SPACE or CLICK to Start', centerX, powerUpsY + 100);
     this.ctx.shadowBlur = 0;
+  }
+
+  drawStatusIndicator(centerX: number, y: number, status: any) {
+    if (!status) {
+      this.ctx.fillStyle = '#ff4444';
+      this.ctx.font = 'bold 16px Arial';
+      this.ctx.fillText('⚠️  Checking connection...', centerX, y);
+      return;
+    }
+
+    let icon = '';
+    let color = '';
+    let message = '';
+
+    if (status.middleware === 'error') {
+      icon = '❌';
+      color = '#ff4444';
+      message = status.message || 'Middleware not reachable';
+    } else if (status.k8s === 'error') {
+      icon = '⚠️';
+      color = '#ffaa00';
+      message = status.message || 'Kubernetes connection failed';
+    } else {
+      icon = '✅';
+      color = '#00ff88';
+      message = `${status.message} (${status.runningPods} pods)`;
+    }
+
+    this.ctx.fillStyle = color;
+    this.ctx.font = 'bold 16px Arial';
+    this.ctx.fillText(`${icon}  ${message}`, centerX, y);
+  }
+
+  drawMenuPlaceholder() {
+    const centerX = this.width / 2;
+    const y = this.height / 2 - 80;
+
+    this.ctx.fillStyle = '#ff4444';
+    this.ctx.font = 'bold 16px Arial';
+    this.ctx.fillText('❌  Middleware not reachable', centerX, y);
   }
 }
