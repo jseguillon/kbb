@@ -274,14 +274,18 @@ private resize() {
       const hitBrick = this.collisionSystem.checkBrickCollision(ball, this.brickManager.brickList);
       if (hitBrick) {
         ball.bounceOffBrick(hitBrick);
-        this.brickManager.removeBrick(hitBrick);
+        hitBrick.health--;
         this.scoreManager.addScore(10);
-        this.trySpawnPowerUp(hitBrick);
-        if (this.isRedBrick(hitBrick.color)) {
-          KubernetesService.terminateRandomPod((podName) => {
-            this.killedPod = podName;
-            this.killedPodTimer = Date.now();
-          });
+        
+        if (hitBrick.health <= 0) {
+          this.brickManager.removeBrick(hitBrick);
+          this.trySpawnPowerUp(hitBrick);
+          if (this.isRedBrick(hitBrick.color)) {
+            KubernetesService.terminateRandomPod((podName) => {
+              this.killedPod = podName;
+              this.killedPodTimer = Date.now();
+            });
+          }
         }
       }
     });
@@ -330,14 +334,18 @@ private resize() {
 
       if (hitBrick) {
         laser.active = false;
-        this.brickManager.removeBrick(hitBrick);
+        hitBrick.health--;
         this.scoreManager.addScore(10);
-        this.trySpawnPowerUp(hitBrick);
-        if (this.isRedBrick(hitBrick.color)) {
-          KubernetesService.terminateRandomPod((podName: string) => {
-            this.killedPod = podName;
-            this.killedPodTimer = Date.now();
-          });
+        
+        if (hitBrick.health <= 0) {
+          this.brickManager.removeBrick(hitBrick);
+          this.trySpawnPowerUp(hitBrick);
+          if (this.isRedBrick(hitBrick.color)) {
+            KubernetesService.terminateRandomPod((podName: string) => {
+              this.killedPod = podName;
+              this.killedPodTimer = Date.now();
+            });
+          }
         }
       }
     });
