@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"math/rand"
 	"net/http"
@@ -34,6 +35,66 @@ type TerminateResponse struct {
 	Success bool   `json:"success"`
 	Message string `json:"message,omitempty"`
 	Pod     string `json:"pod,omitempty"`
+}
+
+type StatusResponse struct {
+	Middleware string `json:"middleware"`
+	K8s        string `json:"k8s"`
+	Message    string `json:"message"`
+	RunningPods int   `json:"runningPods,omitempty"`
+}
+
+func statusHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	response := StatusResponse{
+		Middleware: "ok",
+		K8s:        "error",
+		Message:    "Initializing K8s connection...",
+	}
+
+	config, err := loadK8sConfig()
+	if err != nil {
+		response.K8s = "error"
+		response.Message = fmt.Sprintf("Failed to load kubeconfig: %v", err)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	clientset, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		response.K8s = "error"
+		response.Message = fmt.Sprintf("Failed to create K8s client: %v", err)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	pods, err := clientset.CoreV1().Pods("").List(context.Background(), metav1.ListOptions{})
+	if err != nil {
+		response.K8s = "error"
+		response.Message = fmt.Sprintf("Failed to list pods: %v", err)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	runningPods := 0
+	excludedNamespaces := map[string]bool{
+		"kube-system": true,
+	}
+
+	for _, pod := range pods.Items {
+		if excludedNamespaces[pod.Namespace] {
+			continue
+		}
+		if pod.Status.Phase == "Running" {
+			runningPods++
+		}
+	}
+
+	response.K8s = "ok"
+	response.Message = "Connected to Kubernetes cluster"
+	response.RunningPods = runningPods
+	json.NewEncoder(w).Encode(response)
 }
 
 func terminatePodHandler(w http.ResponseWriter, r *http.Request) {
@@ -152,6 +213,7 @@ func loadK8sConfig() (*rest.Config, error) {
 func main() {
 	rand.Seed(time.Now().UnixNano())
 
+	http.HandleFunc("/status", withCORS(statusHandler))
 	http.HandleFunc("/api/v1/pod/terminate", withCORS(terminatePodHandler))
 
 	port := os.Getenv("PORT")
