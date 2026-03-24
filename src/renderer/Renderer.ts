@@ -160,12 +160,14 @@ export class Renderer {
     this.ctx.fillText('CONTROLS', centerX, startY + 140);
 
     this.ctx.fillStyle = '#ffffff';
-    this.ctx.font = '16px Arial';
-    this.ctx.fillText('← → / Arrow Keys : Move paddle', centerX, startY + 180);
-    this.ctx.fillText('Mouse              : Move paddle', centerX, startY + 205);
-    this.ctx.fillText('Space / Click      : Launch ball', centerX, startY + 230);
-    this.ctx.fillText('+ / -              : Adjust game speed', centerX, startY + 255);
-    this.ctx.fillText('ESC                : Pause game', centerX, startY + 280);
+    this.ctx.font = '15px monospace';
+    this.ctx.textAlign = 'left';
+    this.ctx.fillText('← → / Arrow Keys  : Move paddle', centerX - 150, startY + 180);
+    this.ctx.fillText('Mouse             : Move paddle', centerX - 150, startY + 202);
+    this.ctx.fillText('Space / Click     : Launch ball', centerX - 150, startY + 224);
+    this.ctx.fillText('+ / -             : Adjust game speed', centerX - 150, startY + 246);
+    this.ctx.fillText('ESC               : Pause game', centerX - 150, startY + 268);
+    this.ctx.textAlign = 'center';
 
     this.ctx.fillStyle = '#ff00ff';
     this.ctx.font = 'bold 20px Arial';
