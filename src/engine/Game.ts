@@ -96,6 +96,15 @@ constructor(canvas: HTMLCanvasElement) {
     
     window.addEventListener('resize', () => this.resize());
     setTimeout(() => this.resize(), 100);
+    
+    if (this.isMobile) {
+      window.addEventListener('beforeunload', (e: BeforeUnloadEvent) => {
+        if (this.gameState.state === GameState.GameStateState.PLAYING) {
+          e.preventDefault();
+          e.returnValue = '';
+        }
+      });
+    }
   }
 
   private resize() {
