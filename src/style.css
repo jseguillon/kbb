@@ -7,6 +7,7 @@
 body {
   background: #0a0a1a;
   min-height: 100vh;
+  width: 100vw;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -14,19 +15,23 @@ body {
   overflow: hidden;
 }
 
+.game-wrapper {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: env(safe-area-inset-left, 0) env(safe-area-inset-right, 0) env(safe-area-inset-bottom, 0) env(safe-area-inset-top, 0);
+}
+
 #game-container {
   position: relative;
-  width: 800px;
-  height: 600px;
-  max-width: 100vw;
-  max-height: 100vh;
+  background: #1a1a2e;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
 }
 
 #gameCanvas {
-  width: 100%;
-  height: 100%;
   display: block;
-  border: 2px solid #333;
   border-radius: 8px;
-  background: #1a1a2e;
 }

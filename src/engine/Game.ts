@@ -76,11 +76,12 @@ export class Game {
     this.brickManager = new BrickManager(canvas.width);
     this.powerUpManager = new PowerUpManager(canvas.width, canvas.height, this);
 
-    this.gameLoop = new GameLoop(this.update.bind(this), this.draw.bind(this));
+this.gameLoop = new GameLoop(this.update.bind(this), this.draw.bind(this));
     
     this.isMobile = this.detectMobile();
-    this.gameSpeed = this.isMobile ? 0.75 : 1;
+    this.gameSpeed = this.isMobile ? 0.75 : 0.5;
 
+    this.preventScroll();
     this.inputHandler.addEventListener('keydown', ((e: Event) => this.handleKeydown(e as KeyboardEvent)) as EventListener);
     this.inputHandler.addEventListener('keyup', ((e: Event) => this.handleKeyup(e as KeyboardEvent)) as EventListener);
     this.inputHandler.addEventListener('mousedown', ((e: Event) => this.handleClick(e as MouseEvent)) as EventListener);
@@ -95,17 +96,52 @@ export class Game {
   }
 
 private resize() {
-    const rect = this.canvas.parentElement?.getBoundingClientRect();
-    if (rect) {
-      this.canvas.width = rect.width;
-      this.canvas.height = rect.height;
-      this.renderer.setDimensions(rect.width, rect.height);
-      this.paddle = new Paddle(this.paddle.x, this.canvas.height - 40, Math.min(100, this.canvas.width * 0.15), 15);
-      if (!this.levelManager && this.brickManager) {
-        this.levelManager = new LevelManager(0);
-        this.powerUpManager = new PowerUpManager(this.canvas.width, this.canvas.height, this);
-        this.loadLevel(0);
-      }
+    const wrapper = document.querySelector('.game-wrapper') as HTMLElement;
+    if (!wrapper) return;
+
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+
+    const targetWidth = 800;
+    const targetHeight = 600;
+    const targetAspectRatio = targetWidth / targetHeight;
+
+    const viewportAspectRatio = viewportWidth / viewportHeight;
+
+    let canvasWidth: number;
+    let canvasHeight: number;
+
+    if (viewportAspectRatio > targetAspectRatio) {
+      canvasWidth = Math.min(viewportWidth, targetWidth);
+      canvasHeight = canvasWidth / targetAspectRatio;
+    } else {
+      canvasHeight = Math.min(viewportHeight, targetHeight);
+      canvasWidth = canvasHeight * targetAspectRatio;
+    }
+
+    const wrapperRect = wrapper.getBoundingClientRect();
+    const offsetX = (wrapperRect.width - canvasWidth) / 2;
+    const offsetY = (wrapperRect.height - canvasHeight) / 2;
+
+    const container = this.canvas.parentElement;
+    if (container) {
+      container.style.width = `${canvasWidth}px`;
+      container.style.height = `${canvasHeight}px`;
+      container.style.left = `${offsetX}px`;
+      container.style.top = `${offsetY}px`;
+    }
+
+    this.canvas.width = canvasWidth;
+    this.canvas.height = canvasHeight;
+    this.renderer.setDimensions(canvasWidth, canvasHeight);
+
+    const paddleWidth = Math.min(100, canvasWidth * 0.15);
+    this.paddle = new Paddle(canvasWidth / 2, canvasHeight - 40, paddleWidth, 15);
+
+    if (!this.levelManager && this.brickManager) {
+      this.levelManager = new LevelManager(0);
+      this.powerUpManager = new PowerUpManager(canvasWidth, canvasHeight, this);
+      this.loadLevel(0);
     }
   }
 
@@ -246,18 +282,30 @@ private resize() {
     return mobileRegex.test(navigator.userAgent) || window.matchMedia('(pointer: coarse)').matches;
   }
 
+  private preventScroll(): void {
+    const prevent = (e: Event) => e.preventDefault();
+    
+    window.addEventListener('touchmove', prevent, { passive: false });
+    window.addEventListener('wheel', prevent, { passive: false });
+    
+    document.addEventListener('keydown', (e: KeyboardEvent) => {
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) {
+        e.preventDefault();
+      }
+    }, { passive: false });
+  }
+
   private startGame() {
     this.gameState = GameState.createPlaying();
-    this.paddle = new Paddle(this.canvas.width / 2, this.canvas.height - 40, Math.min(100, this.canvas.width * 0.15), 15);
     this.levelManager = new LevelManager(0);
     this.renderer.setTotalLevels(this.levelManager.getTotalLevels());
-    this.balls = [new Ball(this.canvas.width / 2, this.canvas.height - 60, 8, true)];
-    this.loadLevel(0);
     this.scoreManager.reset();
     this.powerUpManager.reset();
     this.hasLaser = false;
     this.lasers = [];
     this.lastLaserTime = 0;
+    this.resize();
+    this.balls = [new Ball(this.canvas.width / 2, this.canvas.height - 60, 8, true)];
   }
 
   private loadLevel(_levelIndex: number): void {
