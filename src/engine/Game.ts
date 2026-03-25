@@ -79,7 +79,7 @@ export class Game {
     this.gameLoop = new GameLoop(this.update.bind(this), this.draw.bind(this));
     
     this.isMobile = this.detectMobile();
-    this.gameSpeed = this.isMobile ? 0.75 : 0.5;
+    this.gameSpeed = this.isMobile ? 0.75 : 1;
 
     this.inputHandler.addEventListener('keydown', ((e: Event) => this.handleKeydown(e as KeyboardEvent)) as EventListener);
     this.inputHandler.addEventListener('keyup', ((e: Event) => this.handleKeyup(e as KeyboardEvent)) as EventListener);
