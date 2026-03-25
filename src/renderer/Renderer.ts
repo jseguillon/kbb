@@ -40,8 +40,18 @@ export class Renderer {
     this.ctx.fillStyle = '#ff4444';
     this.ctx.font = 'bold 20px Arial';
     this.ctx.textAlign = 'right';
-    const hearts = '❤️'.repeat(this.lives);
-    this.ctx.fillText(hearts, this.width - 20, 30);
+    
+    const heartsPerRow = 4;
+    const lineHeight = 24;
+    const baseY = 30;
+    
+    for (let row = 0; row < Math.ceil(this.lives / heartsPerRow); row++) {
+      const startHeart = row * heartsPerRow;
+      const remainingHearts = Math.min(heartsPerRow, this.lives - startHeart);
+      const heartsRow = '❤️'.repeat(remainingHearts);
+      const y = baseY + row * lineHeight;
+      this.ctx.fillText(heartsRow, this.width - 20, y);
+    }
   }
 
   setScore(score: number) {
@@ -57,8 +67,18 @@ export class Renderer {
     this.ctx.fillStyle = '#ff4444';
     this.ctx.font = 'bold 20px Arial';
     this.ctx.textAlign = 'right';
-    const hearts = '❤️'.repeat(lives);
-    this.ctx.fillText(hearts, this.width - 20, 30);
+    
+    const heartsPerRow = 4;
+    const lineHeight = 24;
+    const baseY = 30;
+    
+    for (let row = 0; row < Math.ceil(lives / heartsPerRow); row++) {
+      const startHeart = row * heartsPerRow;
+      const remainingHearts = Math.min(heartsPerRow, lives - startHeart);
+      const heartsRow = '❤️'.repeat(remainingHearts);
+      const y = baseY + row * lineHeight;
+      this.ctx.fillText(heartsRow, this.width - 20, y);
+    }
   }
 
   setLevel(level: number, totalLevels: number) {
