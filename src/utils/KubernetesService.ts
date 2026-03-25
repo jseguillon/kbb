@@ -7,6 +7,18 @@ export class KubernetesService {
     message: string;
     runningPods: number;
   } | null = null;
+  private static readonly SIMULATE_POD_NAMES = [
+    "frontend-abc123",
+    "backend-xyz789",
+    "worker-job456",
+    "api-service-001",
+    "cache-node-02",
+    "db-primary-01",
+    "monitoring-agent",
+    "auth-service-03",
+    "message-queue",
+    "storage-bucket-01"
+  ];
 
   static async checkStatus(): Promise<{
     middleware: string;
@@ -45,6 +57,16 @@ export class KubernetesService {
   }
 
   static terminateRandomPod(callback: (podName: string) => void): void {
+    const urlParams = new URLSearchParams(window.location.search);
+    const simulate = urlParams.get("simulate") === "true";
+
+    if (simulate) {
+      const randomPod = this.SIMULATE_POD_NAMES[Math.floor(Math.random() * this.SIMULATE_POD_NAMES.length)];
+      console.log(`[SIMULATE] Pod terminated: ${randomPod}`);
+      callback(randomPod);
+      return;
+    }
+
     console.log("K8s: Attempting pod termination");
     fetch(this.API_URL, {
       method: "DELETE",
