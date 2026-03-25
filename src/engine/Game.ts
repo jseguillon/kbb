@@ -51,10 +51,8 @@ export class Game {
   private touchStartX: number = 0;
   private lastTouchX: number = 0;
   private isMobile: boolean = false;
-  private readonly TARGET_WIDTH: number = 800;
-  private readonly TARGET_HEIGHT: number = 600;
-  private readonly MIN_WIDTH: number = 400;
-  private readonly MIN_HEIGHT: number = 300;
+  private readonly TARGET_WIDTH: number = 1440;
+  private readonly TARGET_HEIGHT: number = 1080;
   private readonly MAX_WIDTH: number = 1920;
   private readonly MAX_HEIGHT: number = 1080;
 
@@ -85,7 +83,7 @@ constructor(canvas: HTMLCanvasElement) {
     this.gameLoop = new GameLoop(this.update.bind(this), this.draw.bind(this));
     
     this.isMobile = this.detectMobile();
-    this.gameSpeed = this.isMobile ? 0.75 : 0.5;
+    this.gameSpeed = this.isMobile ? 0.75 : 1.7;
 
     this.inputHandler.addEventListener('keydown', ((e: Event) => this.handleKeydown(e as KeyboardEvent)) as EventListener);
     this.inputHandler.addEventListener('keyup', ((e: Event) => this.handleKeyup(e as KeyboardEvent)) as EventListener);
@@ -100,7 +98,7 @@ constructor(canvas: HTMLCanvasElement) {
     setTimeout(() => this.resize(), 100);
   }
 
-private resize() {
+  private resize() {
     const wrapper = this.canvas.parentElement?.parentElement;
     if (!wrapper) return;
 
@@ -108,16 +106,19 @@ private resize() {
     const viewportWidth = Math.min(wrapperRect.width, this.MAX_WIDTH);
     const viewportHeight = Math.min(wrapperRect.height, this.MAX_HEIGHT);
 
-    const aspectRatio = this.TARGET_WIDTH / this.TARGET_HEIGHT;
     let canvasWidth: number;
     let canvasHeight: number;
 
-    if (viewportWidth / viewportHeight > aspectRatio) {
-      canvasHeight = Math.max(viewportHeight, this.MIN_HEIGHT);
-      canvasWidth = canvasHeight * aspectRatio;
-    } else {
-      canvasWidth = Math.max(viewportWidth, this.MIN_WIDTH);
-      canvasHeight = canvasWidth / aspectRatio;
+    const widthScale = viewportWidth / this.TARGET_WIDTH;
+    const heightScale = viewportHeight / this.TARGET_HEIGHT;
+    const finalScale = Math.min(widthScale, heightScale);
+
+    canvasWidth = this.TARGET_WIDTH * finalScale;
+    canvasHeight = this.TARGET_HEIGHT * finalScale;
+
+    if (canvasHeight < 650) {
+      canvasHeight = 650;
+      canvasWidth = viewportWidth;
     }
 
     canvasWidth = Math.min(canvasWidth, this.MAX_WIDTH);
