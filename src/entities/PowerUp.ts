@@ -40,8 +40,8 @@ export class PowerUp {
         this.label = 'S';
         break;
       case 'life':
-        this.color = '#00ff00';
-        this.label = 'L';
+        this.color = '#ff69b4';
+        this.label = '❤️';
         break;
     }
   }

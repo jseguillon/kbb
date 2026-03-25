@@ -230,8 +230,8 @@ export class Renderer {
     this.ctx.fillText('W - Wide Paddle   M - Multi Ball', centerX, powerUpsY + 20);
     this.ctx.fillStyle = '#ff4400';
     this.ctx.fillText('L - Laser         S - Slow Ball', centerX, powerUpsY + 40);
-    this.ctx.fillStyle = '#00ff00';
-    this.ctx.fillText('💚 - Extra Life', centerX, powerUpsY + 60);
+    this.ctx.fillStyle = '#ff69b4';
+    this.ctx.fillText('❤️ - Extra Life', centerX, powerUpsY + 60);
 
     this.ctx.fillStyle = '#00ff88';
     this.ctx.font = 'bold 28px Arial';
