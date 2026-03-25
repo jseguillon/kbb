@@ -151,7 +151,20 @@ export class Renderer {
     this.ctx.font = 'bold 24px Arial';
     this.ctx.fillText('Kubernetes Brick Breaker', centerX, startY + 50);
 
-    const status = await game.checkStatus();
+    const urlParams = new URLSearchParams(window.location.search);
+    const simulate = urlParams.get("simulate") === "true";
+    
+    let status: any = null;
+    if (simulate) {
+      status = {
+        middleware: 'simulated',
+        k8s: 'simulated',
+        message: 'Simulated mode',
+        runningPods: 0
+      };
+    } else {
+      status = await game.checkStatus();
+    }
     this.drawStatusIndicator(centerX, startY + 90, status);
 
     this.ctx.font = '18px Arial';
@@ -218,7 +231,11 @@ export class Renderer {
     let color = '';
     let message = '';
 
-    if (status.middleware === 'error') {
+    if (status.middleware === 'simulated') {
+      icon = '🎮';
+      color = '#00ff88';
+      message = 'Simulated mode';
+    } else if (status.middleware === 'error') {
       icon = '❌';
       color = '#ff4444';
       message = status.message || 'Middleware not reachable';
