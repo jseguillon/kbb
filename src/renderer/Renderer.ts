@@ -40,7 +40,8 @@ export class Renderer {
     this.ctx.fillStyle = '#ff4444';
     this.ctx.font = 'bold 20px Arial';
     this.ctx.textAlign = 'right';
-    this.ctx.fillText(`Lives: ${this.lives}`, this.width - 20, 30);
+    const hearts = '❤️'.repeat(this.lives);
+    this.ctx.fillText(hearts, this.width - 20, 30);
   }
 
   setScore(score: number) {
@@ -56,7 +57,8 @@ export class Renderer {
     this.ctx.fillStyle = '#ff4444';
     this.ctx.font = 'bold 20px Arial';
     this.ctx.textAlign = 'right';
-    this.ctx.fillText(`Lives: ${lives}`, this.width - 20, 30);
+    const hearts = '❤️'.repeat(lives);
+    this.ctx.fillText(hearts, this.width - 20, 30);
   }
 
   setLevel(level: number, totalLevels: number) {
