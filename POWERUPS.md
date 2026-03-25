@@ -1,4 +1,4 @@
-# Arkanoid - Power-Up Features
+# KBB - Power-Up Features
 
 ## Overview
 Added a comprehensive power-up system with 5 different bonus types that can drop from destroyed bricks.
@@ -56,7 +56,7 @@ Added a comprehensive power-up system with 5 different bonus types that can drop
 - `src/engine/Game.ts` - Integrated power-up system
 - `src/entities/Ball.ts` - Added support for multiple balls
 - `src/entities/index.ts` - Export PowerUp types
-- `e2e/arkanoid.spec.ts` - Added power-up tests
+- `e2e/KBB.spec.ts` - Added power-up tests
 
 ## Game Mechanics
 

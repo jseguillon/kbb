@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document describes the complete Kubernetes deployment for the Arkanoid game with Kubernetes middleware integration.
+This document describes the complete Kubernetes deployment for the KBB game with Kubernetes middleware integration.
 
 ## Architecture
 
@@ -12,7 +12,7 @@ This document describes the complete Kubernetes deployment for the Arkanoid game
 │                                                              │
 │  ┌────────────────────┐     ┌────────────────────┐          │
 │  │   Ingress          │     │   RBAC             │          │
-│  │   (arkanoid.local) │     │   (ServiceAccount) │          │
+│  │   (KBB.local) │     │   (ServiceAccount) │          │
 │  └──────────┬─────────┘     └────────────────────┘          │
 │             │                                                 │
 │  ┌──────────▼──────────────────────────────────┐            │
@@ -142,9 +142,9 @@ kubectl create secret generic kubeconfig-secret \
 # Apply ingress
 kubectl apply -f k8s/frontend-deployment.yaml
 
-# Access at: http://arkanoid.local
+# Access at: http://KBB.local
 # Add to /etc/hosts if needed:
-# 127.0.0.1 arkanoid.local
+# 127.0.0.1 KBB.local
 ```
 
 #### Option B: Port Forward (Development)
@@ -169,7 +169,7 @@ spec:
 
 Then find the port:
 ```bash
-kubectl get svc arkanoid-frontend -n default
+kubectl get svc KBB-frontend -n default
 ```
 
 ## Verification
@@ -184,12 +184,12 @@ Expected output:
 ```
 === Deployment Status ===
 NAME                     READY   UP-TO-DATE   AVAILABLE   AGE
-arkanoid-frontend        1/1     1            1           2m
+KBB-frontend        1/1     1            1           2m
 k8s-middleware           1/1     1            1           2m
 
 === Services ===
 NAME                     TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)    AGE
-arkanoid-frontend        ClusterIP   10.96.123.45     <none>        80/TCP     2m
+KBB-frontend        ClusterIP   10.96.123.45     <none>        80/TCP     2m
 k8s-middleware           ClusterIP   10.96.234.56     <none>        3001/TCP   2m
 ```
 
@@ -275,7 +275,7 @@ No environment variables required (static build).
      - from:
        - podSelector:
            matchLabels:
-             app: arkanoid-frontend
+             app: KBB-frontend
        ports:
        - protocol: TCP
          port: 3001
@@ -317,10 +317,10 @@ kubectl exec -it <frontend-pod> -- ls /app/dist
 kubectl get pods -n ingress-nginx
 
 # Test DNS
-ping arkanoid.local
+ping KBB.local
 
 # Check ingress resource
-kubectl describe ingress arkanoid-frontend-ingress
+kubectl describe ingress KBB-frontend-ingress
 ```
 
 ## Scaling
@@ -332,12 +332,12 @@ kubectl describe ingress arkanoid-frontend-ingress
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: arkanoid-frontend-hpa
+  name: KBB-frontend-hpa
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: arkanoid-frontend
+    name: KBB-frontend
   minReplicas: 1
   maxReplicas: 5
   metrics:

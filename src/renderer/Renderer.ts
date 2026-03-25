@@ -144,7 +144,7 @@ export class Renderer {
     this.ctx.font = 'bold 64px Arial';
     this.ctx.shadowColor = '#00ff88';
     this.ctx.shadowBlur = 20;
-    this.ctx.fillText('🎮 KUBERNOID', centerX, startY);
+    this.ctx.fillText('🎮 KBB', centerX, startY);
     this.ctx.shadowBlur = 0;
 
     this.ctx.fillStyle = '#ffffff';

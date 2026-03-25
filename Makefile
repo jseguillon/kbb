@@ -7,7 +7,7 @@ MIDDLEWARE_IMAGE?=vibes5-k8s-middleware:latest
 # GitHub Container Registry settings
 GITHUB_USER?=$(shell echo $${GITHUB_USER:-$(USER)})
 GHCR_REGISTRY?=ghcr.io
-GHCR_FRONTEND_IMAGE=$(GHCR_REGISTRY)/$(GITHUB_USER)/arkanoid-frontend:latest
+GHCR_FRONTEND_IMAGE=$(GHCR_REGISTRY)/$(GITHUB_USER)/kbb-frontend:latest
 GHCR_MIDDLEWARE_IMAGE=$(GHCR_REGISTRY)/$(GITHUB_USER)/k8s-middleware:latest
 
 build:

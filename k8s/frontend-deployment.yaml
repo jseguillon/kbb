@@ -1,23 +1,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: arkanoid-frontend
+  name: kbb-frontend
   namespace: default
   labels:
-    app: arkanoid-frontend
+    app: kbb-frontend
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: arkanoid-frontend
+      app: kbb-frontend
   template:
     metadata:
       labels:
-        app: arkanoid-frontend
+        app: kbb-frontend
     spec:
       containers:
       - name: frontend
-        image: arkanoid-frontend:latest
+        image: kbb-frontend:latest
         imagePullPolicy: Never
         ports:
         - containerPort: 80
@@ -45,13 +45,13 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: arkanoid-frontend
+  name: kbb-frontend
   namespace: default
   labels:
-    app: arkanoid-frontend
+    app: kbb-frontend
 spec:
   selector:
-    app: arkanoid-frontend
+    app: kbb-frontend
   ports:
   - port: 80
     targetPort: 80
@@ -62,19 +62,19 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: arkanoid-frontend-ingress
+  name: kbb-frontend-ingress
   namespace: default
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
   rules:
-  - host: arkanoid.local
+  - host: kbb.local
     http:
       paths:
       - path: /
         pathType: Prefix
         backend:
           service:
-            name: arkanoid-frontend
+            name: kbb-frontend
             port:
               number: 80

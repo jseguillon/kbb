@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "=== Kubernetes Arkanoid Test Runner ==="
+echo "=== Kubernetes kbb Test Runner ==="
 echo ""
 echo "Prerequisites:"
 echo "1. Start Go middleware: cd k8s-middleware && ./k8s-middleware"

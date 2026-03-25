@@ -84,7 +84,7 @@ jobs:
           
           echo "Updating frontend deployment with image: ${DOCKER_REGISTRY}/${IMAGE_NAME}:${TAG}"
           
-          kubectl set image deployment/arkanoid-frontend frontend=${DOCKER_REGISTRY}/${IMAGE_NAME}:${TAG} \
+          kubectl set image deployment/kbb-frontend frontend=${DOCKER_REGISTRY}/${IMAGE_NAME}:${TAG} \
             -n ${{ github.event.inputs.namespace || 'default' }} \
             --record
 
@@ -102,7 +102,7 @@ jobs:
 
       - name: Wait for rollout
         run: |
-          kubectl rollout status deployment/arkanoid-frontend \
+          kubectl rollout status deployment/kbb-frontend \
             -n ${{ github.event.inputs.namespace || 'default' }} \
             --timeout=300s
           

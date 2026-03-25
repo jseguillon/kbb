@@ -1,4 +1,4 @@
-# Arkanoid Brick Breaker - Generated Assets
+# KBB Brick Breaker - Generated Assets
 
 This folder contains generated game assets. The game currently uses programmatic rendering via HTML5 Canvas API.
 

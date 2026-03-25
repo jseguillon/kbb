@@ -1,8 +1,8 @@
-# AGENTS.md - Arkanoid Game Development Guide
+# AGENTS.md - KBB Game Development Guide
 
 ## Project Overview
 
-Arkanoid is a TypeScript/Vite brick breaker game with power-up system, E2E testing, and modern architecture.
+KBB is a TypeScript/Vite brick breaker game with power-up system, E2E testing, and modern architecture.
 
 ## Tech Stack
 
@@ -166,7 +166,7 @@ private updateLasers(): void {
 
 ## Testing
 
-### Playwright Tests (e2e/arkanoid.spec.ts)
+### Playwright Tests (e2e/KBB.spec.ts)
 
 Tests cover:
 - Menu navigation
@@ -226,10 +226,10 @@ make k8s-status
 
 # View logs
 kubectl logs -l app=k8s-middleware
-kubectl logs -l app=arkanoid-frontend
+kubectl logs -l app=KBB-frontend
 
 # Port forward for testing
-kubectl port-forward svc/arkanoid-frontend 8080:80
+kubectl port-forward svc/KBB-frontend 8080:80
 kubectl port-forward svc/k8s-middleware 3001:3001
 
 # Delete deployment
@@ -388,13 +388,13 @@ Both deployments include:
 make k8s
 
 # Port forward for testing
-kubectl port-forward svc/arkanoid-frontend 8080:80
+kubectl port-forward svc/KBB-frontend 8080:80
 
 # Check logs
 kubectl logs -l app=k8s-middleware -f
 
 # Scale manually (if using HPA)
-kubectl scale deployment arkanoid-frontend --replicas=3
+kubectl scale deployment KBB-frontend --replicas=3
 ```
 
 ### Production Considerations
@@ -437,7 +437,7 @@ export GITHUB_USER=your-username
 make ghcr
 
 # Deploy manually
-kubectl set image deployment/arkanoid-frontend frontend=ghcr.io/$GITHUB_USER/arkanoid-frontend:main -n default
+kubectl set image deployment/KBB-frontend frontend=ghcr.io/$GITHUB_USER/KBB-frontend:main -n default
 kubectl set image deployment/k8s-middleware middleware=ghcr.io/$GITHUB_USER/k8s-middleware:main -n default
 ```
 

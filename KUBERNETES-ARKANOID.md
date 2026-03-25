@@ -1,6 +1,6 @@
-# Kubernetes Arkanoid
+# Kubernetes KBB
 
-Arkanoid game that terminates Kubernetes pods when breaking red bricks.
+KBB game that terminates Kubernetes pods when breaking red bricks.
 
 ## Architecture
 
@@ -19,7 +19,7 @@ cd /home/jse/vibes5/k8s-middleware
 
 The middleware listens on `http://localhost:3001`
 
-### 2. Start Arkanoid Game (Terminal 2)
+### 2. Start KBB Game (Terminal 2)
 
 ```bash
 cd /home/jse/vibes5
@@ -28,7 +28,7 @@ npm run dev
 
 ## How It Works
 
-1. Play Arkanoid normally
+1. Play KBB normally
 2. Break **red bricks** (`#ff0044`)
 3. The Go middleware receives a DELETE request
 4. Middleware queries K8s API for running pods (excluding `kube-system`)

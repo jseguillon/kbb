@@ -65,7 +65,7 @@ port-forward-middleware:
 
 # Port forward frontend for local testing
 port-forward-frontend:
-	kubectl port-forward svc/arkanoid-frontend 8080:80 -n $(K8S_NAMESPACE)
+	kubectl port-forward svc/kbb-frontend 8080:80 -n $(K8S_NAMESPACE)
 
 # View middleware logs
 logs-middleware:
@@ -73,7 +73,7 @@ logs-middleware:
 
 # View frontend logs
 logs-frontend:
-	kubectl logs -l app=arkanoid-frontend -n $(K8S_NAMESPACE) --tail=100
+	kubectl logs -l app=kbb-frontend -n $(K8S_NAMESPACE) --tail=100
 
 # Check deployment status
 status:

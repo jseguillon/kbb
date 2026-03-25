@@ -1,6 +1,6 @@
 # GitHub Actions Workflows
 
-This directory contains GitHub Actions workflows for building and deploying the Arkanoid game.
+This directory contains GitHub Actions workflows for building and deploying the KBB game.
 
 ## Available Workflows
 
@@ -93,9 +93,9 @@ make ghcr
 
 # Or manually
 docker login ghcr.io -u your-username -p $GITHUB_TOKEN
-docker build -f Dockerfile.front -t ghcr.io/your-username/arkanoid-frontend:latest .
+docker build -f Dockerfile.front -t ghcr.io/your-username/KBB-frontend:latest .
 docker build -f Dockerfile.backend -t ghcr.io/your-username/k8s-middleware:latest .
-docker push ghcr.io/your-username/arkanoid-frontend:latest
+docker push ghcr.io/your-username/KBB-frontend:latest
 docker push ghcr.io/your-username/k8s-middleware:latest
 ```
 
@@ -107,7 +107,7 @@ export FRONTEND_TAG=main
 export MIDDLEWARE_TAG=main
 
 # Update deployment
-kubectl set image deployment/arkanoid-frontend frontend=ghcr.io/your-username/arkanoid-frontend:${FRONTEND_TAG} -n default
+kubectl set image deployment/KBB-frontend frontend=ghcr.io/your-username/KBB-frontend:${FRONTEND_TAG} -n default
 kubectl set image deployment/k8s-middleware middleware=ghcr.io/your-username/k8s-middleware:${MIDDLEWARE_TAG} -n default
 ```
 
@@ -188,11 +188,11 @@ curl -H "Authorization: token $GITHUB_TOKEN" \
 
 ```bash
 # Find previous tag
-kubectl rollout history deployment/arkanoid-frontend -n default
+kubectl rollout history deployment/KBB-frontend -n default
 
 # Rollback to previous version
-kubectl rollout undo deployment/arkanoid-frontend -n default
+kubectl rollout undo deployment/KBB-frontend -n default
 
 # Or rollback to specific tag
-kubectl set image deployment/arkanoid-frontend frontend=ghcr.io/owner/repo/frontend:v0.9.0 -n default
+kubectl set image deployment/KBB-frontend frontend=ghcr.io/owner/repo/frontend:v0.9.0 -n default
 ```

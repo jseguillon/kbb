@@ -1,0 +1,184 @@
+commit 7fe6805ff317ab87e887555edb51fd1893d2f0e6
+Author: Joël Séguillon <joel.seguillon@gmail.com>
+Date:   Tue Mar 24 22:59:44 2026 +0100
+
+    Add glue power-up feature
+    
+    - New 'G' glue power-up that sticks balls to paddle on collision
+    - Balls show orange color with '!' indicator when glued
+    - Press space/tap to release on next paddle bounce
+    - Glue effect lasts 10 seconds
+    - Updated AGENTS.md with implementation documentation
+
+commit 464a587c2f082d2404a3f275ec3e3997cd0bb119
+Author: Joël Séguillon <joel.seguillon@gmail.com>
+Date:   Tue Mar 24 22:48:43 2026 +0100
+
+    Add glue power-up
+    
+    - New 'G' power-up that glues balls to paddle when active
+    - Balls stick to paddle and must be released with space/click/tap
+    - 10 second duration for glue effect
+    - Orange 'G' power-up with visual indicator
+    - Works on both desktop and mobile devices
+
+commit f7208b454b61f256de963397af01669cdd1d825e
+Author: Joël Séguillon <joel.seguillon@gmail.com>
+Date:   Tue Mar 24 20:04:28 2026 +0100
+
+    Add middleware status endpoint and update Makefile
+    
+    - Add /status endpoint to k8s-middleware for health checks
+    - Update Makefile with k8s deployment targets
+    - Update KubernetesService for status checking
+    - Refresh status every 5 seconds in game menu
+
+commit 65f58bb2e8a2fa611f57cbc4b273ca7428b9018f
+Author: Joël Séguillon <joel.seguillon@gmail.com>
+Date:   Tue Mar 24 20:04:24 2026 +0100
+
+    Update Dockerfile.backend and AGENTS.md
+    
+    - Fix Dockerfile.backend for proper Go binary build
+    - Add Kubernetes deployment section to AGENTS.md
+    - Document CI/CD workflows and make targets
+
+commit e2c799a0f8e15bec5f6585db05e99f8096d40751
+Author: Joël Séguillon <joel.seguillon@gmail.com>
+Date:   Tue Mar 24 20:04:21 2026 +0100
+
+    Add complete Kubernetes deployment configuration
+    
+    - Dockerfiles for frontend (Caddy) and middleware (Go)
+    - Kubernetes manifests: RBAC, deployments, services, ingress
+    - GitHub Actions workflows for CI/CD to ghcr.io
+    - Caddyfile with compression and CORS
+    - Makefile targets for ghcr build/push
+    - Deployment documentation and quickstart guides
+
+commit 5e82e763d02b2b7490a202027f487a7d961e78ae
+Author: Joël Séguillon <joel.seguillon@gmail.com>
+Date:   Tue Mar 24 20:04:18 2026 +0100
+
+    Add mobile touch controls, game speed adjustment, and paddle effect
+    
+    - Detect mobile devices and set 25% faster game speed (0.75 vs 0.5)
+    - Add swipe controls for paddle movement on mobile
+    - Tap to launch ball on mobile
+    - Fix level progression bug (levels now go 1-2-3-4-5 correctly)
+    - Add rainbow shake effect to paddle when losing a life
+    - Update menu to show mobile-specific controls
+
+commit 169b64c170da429a53760b4f99a7eea5995fd515
+Author: Joël Séguillon <joel.seguillon@gmail.com>
+Date:   Tue Mar 24 13:19:31 2026 +0100
+
+    hidden key n to go next level
+
+commit bdc6a9398b0aa765e041a56bd198513a6390818c
+Author: Joël Séguillon <joel.seguillon@gmail.com>
+Date:   Tue Mar 24 13:17:50 2026 +0100
+
+    fix controls center
+
+commit 6ca99321c5488c86047b198e69a02e35b0c3ea23
+Author: Joël Séguillon <joel.seguillon@gmail.com>
+Date:   Tue Mar 24 12:51:26 2026 +0100
+
+    red brics need twice shot before being broken
+
+commit 19f77c12d0be582c0ee5ca4b3d4cdf3314f57d3a
+Author: Joël Séguillon <joel.seguillon@gmail.com>
+Date:   Mon Mar 23 23:52:22 2026 +0100
+
+    fix ball re-spawn
+
+commit 4c083f1ff6812083e072ad7e93b21c73c0d4f835
+Author: Joël Séguillon <joel.seguillon@gmail.com>
+Date:   Mon Mar 23 23:40:37 2026 +0100
+
+    no more enter : only space
+
+commit fd5b457d8b0b3bb0f2e3632fcb5711caa4121f52
+Author: Joël Séguillon <joel.seguillon@gmail.com>
+Date:   Mon Mar 23 23:28:17 2026 +0100
+
+    fix multi ball size
+
+commit ac936549c65b43f6f35cdb57ae8ce71b48e89563
+Author: Joël Séguillon <joel.seguillon@gmail.com>
+Date:   Mon Mar 23 23:14:33 2026 +0100
+
+    fix animation no more slowing game
+
+commit f46816d19c5c75a33e757d0e0d6215c6df0d2ee1
+Author: Joël Séguillon <joel.seguillon@gmail.com>
+Date:   Mon Mar 23 23:00:44 2026 +0100
+
+    fix slow power up
+
+commit 991f8bc4bcf0f14f511523ce83c4c2c7009a1d07
+Author: Joël Séguillon <joel.seguillon@gmail.com>
+Date:   Mon Mar 23 22:51:16 2026 +0100
+
+    remove spread power up
+
+commit e525337785b9841d7b6155acfa018482d5cd0f5d
+Author: Joël Séguillon <joel.seguillon@gmail.com>
+Date:   Mon Mar 23 22:40:50 2026 +0100
+
+    intro screen
+
+commit 4bac96441d671c659cac7ac5ae1250f464799460
+Author: Joël Séguillon <joel.seguillon@gmail.com>
+Date:   Mon Mar 23 22:36:38 2026 +0100
+
+    fix mouse pos
+
+commit 1ae41dda661af5c384b43c1911da2dcf894c78a2
+Author: Joël Séguillon <joel.seguillon@gmail.com>
+Date:   Mon Mar 23 22:32:25 2026 +0100
+
+    fix click for next level
+
+commit ef2b8ff969304cad74832364662f0ff74f4b845c
+Author: Joël Séguillon <joel.seguillon@gmail.com>
+Date:   Mon Mar 23 22:25:54 2026 +0100
+
+    animation on pod killed
+
+commit 52d4977af8dedfe456fa1d6ceff22ca20480dbad
+Author: Joël Séguillon <joel.seguillon@gmail.com>
+Date:   Mon Mar 23 21:58:06 2026 +0100
+
+    Dockerfile and Makefile
+
+commit a23df63db675cb53743791e64284753749829a0a
+Author: Joël Séguillon <joel.seguillon@gmail.com>
+Date:   Mon Mar 23 21:14:23 2026 +0100
+
+    also use game speed for powerups
+
+commit b5cccc90ba025b852bf183bf7e41155b691b40a9
+Author: Joël Séguillon <joel.seguillon@gmail.com>
+Date:   Mon Mar 23 20:03:31 2026 +0100
+
+    configurable speed
+
+commit ef163af41848cab07c03b58ec53424b470ea3c9d
+Author: Joël Séguillon <joel.seguillon@gmail.com>
+Date:   Mon Mar 23 19:49:29 2026 +0100
+
+    pod killer plus life power up
+
+commit 331ca55e5f543ec1bc427f65d17c2587310ecc4d
+Author: Joël Séguillon <joel.seguillon@gmail.com>
+Date:   Mon Mar 16 14:24:29 2026 +0100
+
+    more levels
+
+commit 9d151a8c5df452b9dd12d4ca12aaceff2a0e86a4
+Author: Joël Séguillon <joel.seguillon@gmail.com>
+Date:   Mon Mar 16 13:53:50 2026 +0100
+
+    vibe init

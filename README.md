@@ -1,6 +1,6 @@
-# Arkanoid Brick Breaker Game
+# KBB Brick Breaker Game
 
-A modern, browser-based Arkanoid-style brick breaker game built with Vite, TypeScript, and Playwright.
+A modern, browser-based KBB-style brick breaker game built with Vite, TypeScript, and Playwright.
 
 ## Features
 
