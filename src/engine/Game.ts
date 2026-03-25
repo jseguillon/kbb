@@ -51,12 +51,6 @@ export class Game {
   private touchStartX: number = 0;
   private lastTouchX: number = 0;
   private isMobile: boolean = false;
-  private readonly TARGET_WIDTH: number = 800;
-  private readonly TARGET_HEIGHT: number = 600;
-  private readonly MIN_WIDTH: number = 400;
-  private readonly MIN_HEIGHT: number = 300;
-  private readonly MAX_WIDTH: number = 1920;
-  private readonly MAX_HEIGHT: number = 1080;
 
   private isRedBrick(color: string): boolean {
     const redColors = ['#ff0044', '#ff3300', '#ff0000', '#ff4400'];
@@ -67,7 +61,7 @@ export class Game {
     return this.canvas.height;
   }
 
-constructor(canvas: HTMLCanvasElement) {
+ constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d')!;
     
@@ -82,11 +76,12 @@ constructor(canvas: HTMLCanvasElement) {
     this.brickManager = new BrickManager(canvas.width);
     this.powerUpManager = new PowerUpManager(canvas.width, canvas.height, this);
 
-    this.gameLoop = new GameLoop(this.update.bind(this), this.draw.bind(this));
+this.gameLoop = new GameLoop(this.update.bind(this), this.draw.bind(this));
     
     this.isMobile = this.detectMobile();
     this.gameSpeed = this.isMobile ? 0.75 : 0.5;
 
+    this.preventScroll();
     this.inputHandler.addEventListener('keydown', ((e: Event) => this.handleKeydown(e as KeyboardEvent)) as EventListener);
     this.inputHandler.addEventListener('keyup', ((e: Event) => this.handleKeyup(e as KeyboardEvent)) as EventListener);
     this.inputHandler.addEventListener('mousedown', ((e: Event) => this.handleClick(e as MouseEvent)) as EventListener);
@@ -96,53 +91,56 @@ constructor(canvas: HTMLCanvasElement) {
     canvas.addEventListener('touchstart', (e: Event) => this.handleTouchStart(e as TouchEvent), { passive: false });
     canvas.addEventListener('touchmove', (e: Event) => this.handleTouchMove(e as TouchEvent), { passive: false });
     
+    this.resize();
     window.addEventListener('resize', () => this.resize());
-    setTimeout(() => this.resize(), 100);
   }
 
 private resize() {
-    const wrapper = this.canvas.parentElement?.parentElement;
+    const wrapper = document.querySelector('.game-wrapper') as HTMLElement;
     if (!wrapper) return;
 
-    const wrapperRect = wrapper.getBoundingClientRect();
-    const viewportWidth = Math.min(wrapperRect.width, this.MAX_WIDTH);
-    const viewportHeight = Math.min(wrapperRect.height, this.MAX_HEIGHT);
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
 
-    const aspectRatio = this.TARGET_WIDTH / this.TARGET_HEIGHT;
+    const targetWidth = 800;
+    const targetHeight = 600;
+    const targetAspectRatio = targetWidth / targetHeight;
+
+    const viewportAspectRatio = viewportWidth / viewportHeight;
+
     let canvasWidth: number;
     let canvasHeight: number;
 
-    if (viewportWidth / viewportHeight > aspectRatio) {
-      canvasHeight = Math.max(viewportHeight, this.MIN_HEIGHT);
-      canvasWidth = canvasHeight * aspectRatio;
+    if (viewportAspectRatio > targetAspectRatio) {
+      canvasWidth = Math.min(viewportWidth, targetWidth);
+      canvasHeight = canvasWidth / targetAspectRatio;
     } else {
-      canvasWidth = Math.max(viewportWidth, this.MIN_WIDTH);
-      canvasHeight = canvasWidth / aspectRatio;
+      canvasHeight = Math.min(viewportHeight, targetHeight);
+      canvasWidth = canvasHeight * targetAspectRatio;
     }
 
-    canvasWidth = Math.min(canvasWidth, this.MAX_WIDTH);
-    canvasHeight = Math.min(canvasHeight, this.MAX_HEIGHT);
-
-    this.canvas.width = canvasWidth;
-    this.canvas.height = canvasHeight;
-    this.renderer.setDimensions(canvasWidth, canvasHeight);
+    const wrapperRect = wrapper.getBoundingClientRect();
+    const offsetX = (wrapperRect.width - canvasWidth) / 2;
+    const offsetY = (wrapperRect.height - canvasHeight) / 2;
 
     const container = this.canvas.parentElement;
     if (container) {
       container.style.width = `${canvasWidth}px`;
       container.style.height = `${canvasHeight}px`;
+      container.style.left = `${offsetX}px`;
+      container.style.top = `${offsetY}px`;
     }
 
-    this.paddle = new Paddle(
-      this.canvas.width / 2,
-      this.canvas.height - 40,
-      Math.min(100, this.canvas.width * 0.15),
-      15
-    );
+    this.canvas.width = canvasWidth;
+    this.canvas.height = canvasHeight;
+    this.renderer.setDimensions(canvasWidth, canvasHeight);
+
+    const paddleWidth = Math.min(100, canvasWidth * 0.15);
+    this.paddle = new Paddle(canvasWidth / 2, canvasHeight - 40, paddleWidth, 15);
 
     if (!this.levelManager && this.brickManager) {
       this.levelManager = new LevelManager(0);
-      this.powerUpManager = new PowerUpManager(this.canvas.width, this.canvas.height, this);
+      this.powerUpManager = new PowerUpManager(canvasWidth, canvasHeight, this);
       this.loadLevel(0);
     }
   }
@@ -284,18 +282,30 @@ private resize() {
     return mobileRegex.test(navigator.userAgent) || window.matchMedia('(pointer: coarse)').matches;
   }
 
+  private preventScroll(): void {
+    const prevent = (e: Event) => e.preventDefault();
+    
+    window.addEventListener('touchmove', prevent, { passive: false });
+    window.addEventListener('wheel', prevent, { passive: false });
+    
+    document.addEventListener('keydown', (e: KeyboardEvent) => {
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) {
+        e.preventDefault();
+      }
+    }, { passive: false });
+  }
+
   private startGame() {
     this.gameState = GameState.createPlaying();
     this.levelManager = new LevelManager(0);
     this.renderer.setTotalLevels(this.levelManager.getTotalLevels());
-    this.resize();
-    this.balls = [new Ball(this.paddle.x + this.paddle.width / 2, this.paddle.y - 10, 8, true)];
-    this.loadLevel(0);
     this.scoreManager.reset();
     this.powerUpManager.reset();
     this.hasLaser = false;
     this.lasers = [];
     this.lastLaserTime = 0;
+    this.resize();
+    this.balls = [new Ball(this.canvas.width / 2, this.canvas.height - 60, 8, true)];
   }
 
   private loadLevel(_levelIndex: number): void {
