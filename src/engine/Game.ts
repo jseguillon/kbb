@@ -499,7 +499,9 @@ constructor(canvas: HTMLCanvasElement) {
     this.renderer.clear();
 
     if (this.gameState.state === GameState.GameStateState.MENU) {
-      this.renderer.drawMenu(this);
+      this.renderer.drawMenu(this).catch(() => {
+        this.renderer.drawMenuPlaceholder();
+      });
     } else if (this.gameState.state === GameState.GameStateState.PLAYING) {
       this.brickManager.draw(this.renderer.ctx);
       this.powerUpManager.draw(this.renderer.ctx);

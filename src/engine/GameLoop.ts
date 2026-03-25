@@ -1,10 +1,10 @@
 export class GameLoop {
   private updateCallback: (deltaTime: number) => void;
-  private drawCallback: () => Promise<void> | void;
+  private drawCallback: () => void;
   private animationFrameId: number | null = null;
   private lastTime: number = 0;
 
-  constructor(updateCallback: (deltaTime: number) => void, drawCallback: () => Promise<void> | void) {
+  constructor(updateCallback: (deltaTime: number) => void, drawCallback: () => void) {
     this.updateCallback = updateCallback;
     this.drawCallback = drawCallback;
   }
@@ -22,12 +22,12 @@ export class GameLoop {
     }
   }
 
-  private async tick(currentTime: number) {
+  private tick(currentTime: number) {
     const deltaTime = currentTime - this.lastTime;
     this.lastTime = currentTime;
 
     this.updateCallback(deltaTime);
-    await this.drawCallback();
+    this.drawCallback();
 
     this.animationFrameId = requestAnimationFrame(this.tick.bind(this));
   }
