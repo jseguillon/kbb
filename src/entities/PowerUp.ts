@@ -15,8 +15,8 @@ export class PowerUp {
   constructor(x: number, y: number, type: PowerUpType, isDebug: boolean = false) {
     this.x = x;
     this.y = y;
-    this.width = 30;
-    this.height = 15;
+    this.width = 45;
+    this.height = 25;
     this.type = type;
     this.dy = 3;
     this.active = true;
@@ -63,8 +63,8 @@ export class PowerUp {
 
     ctx.fillStyle = '#ffffff';
     ctx.shadowBlur = 0;
-    ctx.font = 'bold 12px Arial';
+    ctx.font = 'bold 18px Arial';
     ctx.textAlign = 'center';
-    ctx.fillText(this.label, this.x + this.width / 2, this.y + 11);
+    ctx.fillText(this.label, this.x + this.width / 2, this.y + 17);
   }
 }
