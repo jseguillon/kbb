@@ -24,19 +24,19 @@ export class PowerUp {
     
     switch (type) {
       case 'wide':
-        this.color = '#00ccff';
+        this.color = '#00ff00';
         this.label = '↔️';
         break;
       case 'multi':
-        this.color = '#ff00ff';
+        this.color = '#ffff00';
         this.label = '🔴';
         break;
       case 'laser':
-        this.color = '#ff4400';
+        this.color = '#ffffff';
         this.label = '👾';
         break;
       case 'slow':
-        this.color = '#00ff88';
+        this.color = '#0000ff';
         this.label = '🐌';
         break;
       case 'life':

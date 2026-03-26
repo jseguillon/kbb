@@ -225,10 +225,10 @@ export class Renderer {
     this.ctx.font = 'bold 20px Arial';
     this.ctx.fillText('POWER-UPS', centerX, powerUpsY);
 
-    this.ctx.fillStyle = '#00ccff';
+    this.ctx.fillStyle = '#00ff00';
     this.ctx.font = '15px monospace';
     this.ctx.fillText('↔️ - Wide Paddle   🔴 - Multi Ball', centerX, powerUpsY + 20);
-    this.ctx.fillStyle = '#ff4400';
+    this.ctx.fillStyle = '#ffffff';
     this.ctx.fillText('👾 - Laser         🐌 - Slow Ball', centerX, powerUpsY + 40);
     this.ctx.fillStyle = '#ff69b4';
     this.ctx.fillText('❤️ - Extra Life', centerX, powerUpsY + 60);
