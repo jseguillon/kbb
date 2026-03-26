@@ -227,9 +227,9 @@ export class Renderer {
 
     this.ctx.fillStyle = '#00ccff';
     this.ctx.font = '15px monospace';
-    this.ctx.fillText('W - Wide Paddle   M - Multi Ball', centerX, powerUpsY + 20);
+    this.ctx.fillText('↔️ - Wide Paddle   🔴 - Multi Ball', centerX, powerUpsY + 20);
     this.ctx.fillStyle = '#ff4400';
-    this.ctx.fillText('L - Laser         S - Slow Ball', centerX, powerUpsY + 40);
+    this.ctx.fillText('👾 - Laser         🐌 - Slow Ball', centerX, powerUpsY + 40);
     this.ctx.fillStyle = '#ff69b4';
     this.ctx.fillText('❤️ - Extra Life', centerX, powerUpsY + 60);
 
