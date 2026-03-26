@@ -1,11 +1,21 @@
+import './components/LevelEditor.css';
 import { Game } from './engine/Game';
+import { LevelEditor } from './components/LevelEditor';
 
-const canvas = document.getElementById('gameCanvas') as HTMLCanvasElement;
+const path = window.location.pathname;
 
-if (canvas) {
-  const game = new Game(canvas);
-  (window as any).game = game;
-  game.start();
+if (path === '/editor') {
+  // Show level editor
+  const editor = new LevelEditor();
+  document.body.appendChild(editor.getContainer());
+} else {
+  // Show game
+  const canvas = document.getElementById('gameCanvas') as HTMLCanvasElement;
+  if (canvas) {
+    const game = new Game(canvas);
+    (window as any).game = game;
+    game.start();
+  }
 }
 
 // Set viewport meta tag for mobile
