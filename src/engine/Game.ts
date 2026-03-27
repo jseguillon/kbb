@@ -37,6 +37,7 @@ export class Game {
   private scoreManager: ScoreManager;
   private powerUpManager: PowerUpManager;
   private levelManager: LevelManager | undefined;
+  private customLevelConfig: import('../logic/LevelManager').LevelConfig | null = null;
   private hasLaser: boolean = false;
   private lasers: Laser[] = [];
   private lastLaserTime: number = 0;
@@ -75,17 +76,17 @@ constructor(canvas: HTMLCanvasElement) {
     this.scoreManager = new ScoreManager();
     this.renderer = new Renderer(this.ctx, canvas.width, canvas.height);
     
-    this.paddle = new Paddle(canvas.width / 2, canvas.height - 40, 100, 15);
-    this.balls = [];
-    this.brickManager = new BrickManager(canvas.width);
-    this.powerUpManager = new PowerUpManager(canvas.width, canvas.height, this);
-
-    this.gameLoop = new GameLoop(this.update.bind(this), this.draw.bind(this));
-    
     this.isMobile = this.detectMobile();
     this.gameSpeed = this.isMobile ? 0.75 : 1.7;
+    
+    this.paddle = new Paddle(canvas.width / 2, canvas.height - 40, 100, 15);
+    this.balls = [];
+    this.brickManager = new BrickManager(canvas.width, undefined, this.isMobile);
+this.powerUpManager = new PowerUpManager(canvas.width, canvas.height, this);
 
-    this.inputHandler.addEventListener('keydown', ((e: Event) => this.handleKeydown(e as KeyboardEvent)) as EventListener);
+this.gameLoop = new GameLoop(this.update.bind(this), this.draw.bind(this));
+
+this.inputHandler.addEventListener('keydown', ((e: Event) => this.handleKeydown(e as KeyboardEvent)) as EventListener);
     this.inputHandler.addEventListener('keyup', ((e: Event) => this.handleKeyup(e as KeyboardEvent)) as EventListener);
     this.inputHandler.addEventListener('mousedown', ((e: Event) => this.handleClick(e as MouseEvent)) as EventListener);
     canvas.addEventListener('touchend', (e: Event) => this.handleTouchEnd(e as TouchEvent), { passive: false });
@@ -211,6 +212,11 @@ constructor(canvas: HTMLCanvasElement) {
           this.scoreManager.addScore(500);
         }
         break;
+      case GameState.GameStateState.CUSTOM_WIN:
+        if (e.key === ' ') {
+          this.startGame();
+        }
+        break;
       case GameState.GameStateState.GAMEOVER:
       case GameState.GameStateState.WIN:
         if (e.key === ' ') {
@@ -251,6 +257,7 @@ constructor(canvas: HTMLCanvasElement) {
         this.gameState = GameState.createPlaying();
         this.scoreManager.addScore(500);
         break;
+      case GameState.GameStateState.CUSTOM_WIN:
       case GameState.GameStateState.GAMEOVER:
       case GameState.GameStateState.WIN:
         this.startGame();
@@ -296,8 +303,26 @@ constructor(canvas: HTMLCanvasElement) {
 
   private startGame() {
     this.gameState = GameState.createPlaying();
-    this.levelManager = new LevelManager(0);
-    this.renderer.setTotalLevels(this.levelManager.getTotalLevels());
+    const urlParams = new URLSearchParams(window.location.search);
+    const customLevelParam = urlParams.get('customLevel');
+    
+    if (customLevelParam) {
+      try {
+        const decoded = atob(customLevelParam);
+        this.customLevelConfig = JSON.parse(decoded);
+        this.levelManager = new LevelManager(0);
+        this.levelManager['customConfig'] = this.customLevelConfig;
+        this.renderer.setTotalLevels(1);
+      } catch (error) {
+        console.error('Failed to load custom level:', error);
+        this.levelManager = new LevelManager(0);
+        this.renderer.setTotalLevels(this.levelManager.getTotalLevels());
+      }
+    } else {
+      this.levelManager = new LevelManager(0);
+      this.renderer.setTotalLevels(this.levelManager.getTotalLevels());
+    }
+    
     this.resize();
     this.balls = [new Ball(this.paddle.x + this.paddle.width / 2, this.paddle.y - 10, 8, true)];
     this.loadLevel(0);
@@ -309,13 +334,13 @@ constructor(canvas: HTMLCanvasElement) {
   }
 
   private loadLevel(_levelIndex: number): void {
-    const config = this.levelManager!.getCurrentConfig();
-    this.brickManager = new BrickManager(this.canvas.width, config);
+    const config = this.customLevelConfig || this.levelManager!.getCurrentConfig();
+    this.brickManager = new BrickManager(this.canvas.width, config, this.isMobile);
     this.powerUpManager = new PowerUpManager(this.canvas.width, this.canvas.height, this, config.powerUpSpawnRate);
     this.hasLaser = false;
     this.lasers = [];
     this.balls.forEach(ball => (ball.speed = config.ballSpeed));
-    this.renderer.setLevel(this.levelManager!.getCurrentLevel(), this.levelManager!.getTotalLevels());
+    this.renderer.setLevel(this.customLevelConfig ? 1 : this.levelManager!.getCurrentLevel(), this.customLevelConfig ? 1 : this.levelManager!.getTotalLevels());
   }
 
   private launchBalls(): void {
@@ -532,6 +557,8 @@ constructor(canvas: HTMLCanvasElement) {
       this.renderer.drawPaused();
     } else if (this.gameState.state === GameState.GameStateState.LEVEL_COMPLETE) {
       this.renderer.drawLevelComplete();
+    } else if (this.gameState.state === GameState.GameStateState.CUSTOM_WIN) {
+      this.renderer.drawCustomWin();
     } else if (this.gameState.state === GameState.GameStateState.GAMEOVER) {
       this.renderer.drawGameOver();
     } else if (this.gameState.state === GameState.GameStateState.WIN) {
@@ -554,7 +581,9 @@ constructor(canvas: HTMLCanvasElement) {
   }
 
   private handleLevelComplete(): void {
-    if (this.levelManager!.nextLevel()) {
+    if (this.customLevelConfig) {
+      this.gameState = GameState.createCustomWin();
+    } else if (this.levelManager!.nextLevel()) {
       this.gameState = GameState.createLevelComplete();
     } else {
       this.gameState = GameState.createWin();

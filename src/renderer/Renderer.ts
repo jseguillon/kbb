@@ -284,4 +284,29 @@ export class Renderer {
     this.ctx.font = 'bold 16px Arial';
     this.ctx.fillText('❌  Middleware not reachable', centerX, y);
   }
+  
+  drawCustomWin() {
+    this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+    this.ctx.fillRect(0, 0, this.width, this.height);
+
+    const centerX = this.width / 2;
+    const centerY = this.height / 2;
+
+    this.ctx.textAlign = 'center';
+
+    this.ctx.fillStyle = '#00ff88';
+    this.ctx.font = 'bold 64px Arial';
+    this.ctx.shadowColor = '#00ff88';
+    this.ctx.shadowBlur = 20;
+    this.ctx.fillText('🎉 Custom Level Complete!', centerX, centerY - 50);
+    this.ctx.shadowBlur = 0;
+
+    this.ctx.fillStyle = '#ffffff';
+    this.ctx.font = '24px Arial';
+    this.ctx.fillText(`Final Score: ${this.score}`, centerX, centerY + 20);
+
+    this.ctx.fillStyle = '#00ccff';
+    this.ctx.font = 'bold 20px Arial';
+    this.ctx.fillText('Press SPACE or CLICK to play again', centerX, centerY + 80);
+  }
 }

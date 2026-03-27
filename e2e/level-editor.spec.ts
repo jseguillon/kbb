@@ -2,10 +2,6 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Level Editor', () => {
   test.beforeEach(async ({ page }) => {
-    // Initialize localStorage before page loads
-    await page.addInitScript(() => {
-      localStorage.setItem('kbb_custom_levels', '[]');
-    });
     await page.goto('http://localhost:5173/editor');
   });
 
@@ -29,6 +25,30 @@ test.describe('Level Editor', () => {
     });
     
     expect(selectedColor).toBeTruthy();
+  });
+
+  test('should have save button', async ({ page }) => {
+    const saveButton = page.locator('.btn-save');
+    await expect(saveButton).toBeVisible();
+    await expect(saveButton).toContainText('Save Level');
+  });
+
+  test('should have load button', async ({ page }) => {
+    const loadButton = page.locator('.btn-load');
+    await expect(loadButton).toBeVisible();
+    await expect(loadButton).toContainText('Load Level');
+  });
+
+  test('should have download button', async ({ page }) => {
+    const downloadButton = page.locator('.btn-download');
+    await expect(downloadButton).toBeVisible();
+    await expect(downloadButton).toContainText('Download');
+  });
+
+  test('should have load from file button', async ({ page }) => {
+    const loadFromFileButton = page.locator('.btn-load-file');
+    await expect(loadFromFileButton).toBeVisible();
+    await expect(loadFromFileButton).toContainText('Load from File');
   });
 
   test('should have clear button', async ({ page }) => {

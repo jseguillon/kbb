@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { LevelEditorManager, type GridCell } from '../logic/LevelEditorManager';
+import { LevelEditorManager } from '../logic/LevelEditorManager';
 
 describe('LevelEditorManager', () => {
   let manager: LevelEditorManager;

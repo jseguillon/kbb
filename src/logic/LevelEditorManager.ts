@@ -22,7 +22,7 @@ export class LevelEditorManager {
   private grid: GridCell[][];
   private currentLevelName: string = 'Custom Level 1';
 
-  constructor(initialRows: number = 16, initialCols: number = 8) {
+  constructor(initialRows: number = 16, initialCols: number = 24) {
     this.gridSize = { rows: initialRows, cols: initialCols };
     this.grid = this.createEmptyGrid();
   }
@@ -59,8 +59,9 @@ export class LevelEditorManager {
     const usedColors = new Set<string>();
     for (let r = 0; r < this.gridSize.rows; r++) {
       for (let c = 0; c < this.gridSize.cols; c++) {
-        if (this.grid[r][c]) {
-          usedColors.add(this.grid[r][c]);
+        const cell = this.grid[r][c];
+        if (cell !== null) {
+          usedColors.add(cell);
         }
       }
     }
@@ -68,8 +69,14 @@ export class LevelEditorManager {
     const colors = Array.from(usedColors);
     const maxRow = this.getMaxFilledRow();
 
+    // Create grid with only filled rows
+    const filledGrid: (string | null)[][] = [];
+    for (let r = 0; r <= maxRow; r++) {
+      filledGrid.push(this.grid[r].map(cell => cell));
+    }
+
     return {
-      rows: maxRow + 1,
+      rows: filledGrid.length,
       cols: this.gridSize.cols,
       offsetTop: 60,
       offsetLeft: 30,
@@ -78,13 +85,15 @@ export class LevelEditorManager {
       colors: colors.length > 0 ? colors : ['#ff0044'],
       ballSpeed: 5,
       powerUpSpawnRate: 5,
+      grid: filledGrid,
     };
   }
 
   private getMaxFilledRow(): number {
     for (let r = this.gridSize.rows - 1; r >= 0; r--) {
       for (let c = 0; c < this.gridSize.cols; c++) {
-        if (this.grid[r][c]) {
+        const cell = this.grid[r][c];
+        if (cell !== null) {
           return r;
         }
       }

@@ -8,6 +8,7 @@ export type LevelConfig = {
   colors: string[];
   ballSpeed: number;
   powerUpSpawnRate: number;
+  grid?: (string | null)[][];
 };
 
 const LEVELS: LevelConfig[] = [
@@ -71,6 +72,7 @@ const LEVELS: LevelConfig[] = [
 export class LevelManager {
   private levelIndex: number;
   private configs: LevelConfig[];
+  public customConfig: LevelConfig | null = null;
 
   constructor(initialLevel: number = 0) {
     this.levelIndex = initialLevel;
@@ -78,6 +80,9 @@ export class LevelManager {
   }
 
   getCurrentConfig(): LevelConfig {
+    if (this.customConfig) {
+      return this.customConfig;
+    }
     return this.configs[this.levelIndex % this.configs.length];
   }
 
@@ -91,6 +96,9 @@ export class LevelManager {
   }
 
   getTotalLevels(): number {
+    if (this.customConfig) {
+      return 1;
+    }
     return this.configs.length;
   }
 

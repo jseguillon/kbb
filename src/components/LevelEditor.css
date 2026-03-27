@@ -1,0 +1,222 @@
+.level-editor-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #0a0a1a;
+  color: #fff;
+  font-family: Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.editor-header {
+  padding: 20px;
+  background: #1a1a2e;
+  border-bottom: 2px solid #333;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.editor-header h1 {
+  margin: 0;
+  font-size: 28px;
+  color: #00ff88;
+}
+
+.editor-controls {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.level-name-input {
+  padding: 8px 12px;
+  background: #2a2a3e;
+  border: 1px solid #444;
+  color: #fff;
+  border-radius: 4px;
+  font-size: 14px;
+  width: 200px;
+}
+
+.btn-save,
+.btn-download,
+.btn-load-file {
+  padding: 8px 16px;
+  background: #00ccff;
+  border: none;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-save:hover {
+  background: #00aaee;
+}
+
+.btn-download:hover,
+.btn-load-file:hover {
+  background: #00aaee;
+}
+
+.btn-load {
+  background: #ff6600;
+}
+
+.btn-load:hover {
+  background: #ee5500;
+}
+
+.btn-clear {
+  background: #ff4444;
+}
+
+.btn-clear:hover {
+  background: #dd3333;
+}
+
+.btn-back {
+  background: #666;
+}
+
+.btn-back:hover {
+  background: #555;
+}
+
+.editor-main {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+.editor-sidebar {
+  width: 300px;
+  background: #1a1a2e;
+  padding: 20px;
+  overflow-y: auto;
+  border-right: 2px solid #333;
+}
+
+.color-selector h3,
+.save-load-section h3,
+.editor-help h3 {
+  margin: 0 0 15px 0;
+  font-size: 16px;
+  color: #00ccff;
+}
+
+.color-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.color-btn {
+  width: 50px;
+  height: 50px;
+  border: 2px solid #444;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.color-btn:hover {
+  border-color: #fff;
+}
+
+.color-btn:active {
+  transform: scale(0.95);
+}
+
+.saved-levels-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.saved-level-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #2a2a3e;
+  padding: 10px;
+  border-radius: 4px;
+}
+
+.saved-level-item span {
+  flex: 1;
+}
+
+.level-actions {
+  display: flex;
+  gap: 5px;
+}
+
+.btn-load-level,
+.btn-delete-level {
+  padding: 4px 8px;
+  font-size: 12px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.btn-load-level {
+  background: #00ccff;
+  color: #fff;
+}
+
+.btn-delete-level {
+  background: #ff4444;
+  color: #fff;
+}
+
+.no-levels {
+  color: #666;
+  font-style: italic;
+  text-align: center;
+  padding: 20px;
+}
+
+.editor-help ul {
+  margin: 0;
+  padding-left: 20px;
+  color: #ccc;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.editor-canvas-container {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  background: #0f0f1f;
+  overflow: auto;
+}
+
+#editorCanvas {
+  background: #1a1a2e;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+  border-radius: 4px;
+}
+
+.editor-footer {
+  padding: 10px 20px;
+  background: #1a1a2e;
+  border-top: 2px solid #333;
+  text-align: center;
+}
+
+.info-text {
+  color: #888;
+  font-size: 14px;
+}

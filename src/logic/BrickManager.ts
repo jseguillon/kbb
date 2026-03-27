@@ -4,10 +4,12 @@ import type { LevelConfig } from './LevelManager';
 export class BrickManager {
   brickList: Brick[];
   private config: LevelConfig;
+  private isMobile: boolean;
 
-  constructor(canvasWidth: number = 800, config?: LevelConfig) {
+  constructor(canvasWidth: number = 800, config?: LevelConfig, isMobile: boolean = false) {
     this.brickList = [];
     this.config = config || this.getDefaultConfig();
+    this.isMobile = isMobile;
     
     this.createBricks(canvasWidth);
   }
@@ -28,18 +30,35 @@ export class BrickManager {
 
   createBricks(width: number) {
     const availableWidth = width - 2 * this.config.offsetLeft;
-    const brickWidth = availableWidth / this.config.cols - this.config.padding;
-    const brickHeight = this.config.brickHeight;
+    const brickPadding = this.isMobile ? 2 : this.config.padding;
+    const brickHeight = this.isMobile ? this.config.brickHeight * 0.8 : this.config.brickHeight;
+    const brickWidth = availableWidth / this.config.cols - brickPadding;
     
-    const colors = this.config.colors;
-
-    for (let c = 0; c < this.config.cols; c++) {
-      for (let r = 0; r < this.config.rows; r++) {
-        const brickX = this.config.offsetLeft + c * (brickWidth + this.config.padding);
-        const brickY = this.config.offsetTop + r * (brickHeight + this.config.padding);
-        const color = colors[r % colors.length];
-        
-        this.brickList.push(new Brick(brickX, brickY, brickWidth, brickHeight, color));
+    const grid = this.config.grid;
+    
+    if (grid && grid.length > 0) {
+      // Use grid layout to place bricks with specific colors
+      for (let r = 0; r < grid.length; r++) {
+        for (let c = 0; c < grid[r].length; c++) {
+          const color = grid[r][c];
+          if (color !== null) {
+            const brickX = this.config.offsetLeft + c * (brickWidth + brickPadding);
+            const brickY = this.config.offsetTop + r * (brickHeight + brickPadding);
+            this.brickList.push(new Brick(brickX, brickY, brickWidth, brickHeight, color));
+          }
+        }
+      }
+    } else {
+      // Fallback to color cycling for old configs without grid
+      const colors = this.config.colors;
+      for (let c = 0; c < this.config.cols; c++) {
+        for (let r = 0; r < this.config.rows; r++) {
+          const brickX = this.config.offsetLeft + c * (brickWidth + brickPadding);
+          const brickY = this.config.offsetTop + r * (brickHeight + brickPadding);
+          const color = colors[r % colors.length];
+          
+          this.brickList.push(new Brick(brickX, brickY, brickWidth, brickHeight, color));
+        }
       }
     }
   }
