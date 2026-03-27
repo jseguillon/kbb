@@ -25,8 +25,15 @@ export class LevelLoader {
     try {
       const response = await fetch(filePath);
       if (!response.ok) {
-        throw new Error(`Failed to load level: ${response.statusText}`);
+        throw new Error(`Failed to load level: ${response.status} ${response.statusText}`);
       }
+      
+      // Check content type
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error(`Invalid content type: ${contentType}`);
+      }
+      
       const data = await response.json();
       
       let grid: (string | null)[][];
@@ -40,8 +47,14 @@ export class LevelLoader {
         settings = data.settings;
       }
       
+      if (!grid || !Array.isArray(grid)) {
+        throw new Error('Invalid grid format in level file');
+      }
+      
       const colors = this.extractColors(grid);
       const name = this.extractNameFromPath(filePath);
+      
+      console.log(`Level loaded successfully: ${filePath}`, { name, rows: grid.length, cols: grid[0]?.length, colors });
       
       return { name, grid, colors, settings };
     } catch (error) {
