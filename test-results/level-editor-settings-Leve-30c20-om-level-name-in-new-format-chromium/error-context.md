@@ -1,0 +1,51 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e4]:
+  - generic [ref=e5]:
+    - heading "🎮 Level Editor" [level=1] [ref=e6]
+    - generic [ref=e7]:
+      - textbox "Level Name" [ref=e8]: Unique Test Level Name
+      - button "Save Level" [active] [ref=e9] [cursor=pointer]
+      - button "Load Level" [ref=e10]
+      - button "Download" [ref=e11] [cursor=pointer]
+      - button "Load from File" [ref=e12] [cursor=pointer]
+      - button "Clear" [ref=e13]
+      - button "▶️ Play Level" [ref=e14]
+      - button "← Back to Game" [ref=e15]
+  - generic [ref=e17]:
+    - generic [ref=e18]:
+      - heading "Select Brick Color" [level=3] [ref=e19]
+      - generic [ref=e20]:
+        - button [ref=e21] [cursor=pointer]
+        - button [ref=e22] [cursor=pointer]
+        - button [ref=e23] [cursor=pointer]
+        - button [ref=e24] [cursor=pointer]
+        - button [ref=e25] [cursor=pointer]
+        - button [ref=e26] [cursor=pointer]
+        - button [ref=e27] [cursor=pointer]
+        - button [ref=e28] [cursor=pointer]
+        - button [ref=e29] [cursor=pointer]
+        - button [ref=e30] [cursor=pointer]
+        - button [ref=e31] [cursor=pointer]
+        - button [ref=e32] [cursor=pointer]
+        - button [ref=e33] [cursor=pointer]
+    - generic [ref=e34]:
+      - heading "Save / Load Levels" [level=3] [ref=e35]
+      - generic [ref=e37]:
+        - generic [ref=e38]: Custom Level 1
+        - generic [ref=e39]:
+          - button "Load" [ref=e40] [cursor=pointer]
+          - button "Delete" [ref=e41] [cursor=pointer]
+    - generic [ref=e42]:
+      - heading "How to Use" [level=3] [ref=e43]
+      - list [ref=e44]:
+        - listitem [ref=e45]:
+          - strong [ref=e46]: "Left Click:"
+          - text: Place brick
+        - listitem [ref=e47]:
+          - strong [ref=e48]: "Right Click:"
+          - text: Delete brick
+        - listitem [ref=e49]: Select color first, then click on grid
+  - generic [ref=e52]: "Grid: 24 columns × 16 rows | Click to edit bricks"
+```
