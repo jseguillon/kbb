@@ -12,7 +12,7 @@ test.describe('Level Editor', () => {
 
   test('should display color selector', async ({ page }) => {
     const colorButtons = page.locator('.color-btn');
-    await expect(colorButtons).toHaveCount(12);
+    await expect(colorButtons).toHaveCount(13);
   });
 
   test('should allow selecting color', async ({ page }) => {

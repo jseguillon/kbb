@@ -48,18 +48,19 @@ export class LevelEditor {
           <div class="color-selector">
             <h3>Select Brick Color</h3>
             <div class="color-grid">
-              <button class="color-btn" data-color="#ff0044" style="background: #ff0044;"></button>
-              <button class="color-btn" data-color="#ff6600" style="background: #ff6600;"></button>
-              <button class="color-btn" data-color="#ffcc00" style="background: #ffcc00;"></button>
-              <button class="color-btn" data-color="#00cc66" style="background: #00cc66;"></button>
-              <button class="color-btn" data-color="#0066ff" style="background: #0066ff;"></button>
-              <button class="color-btn" data-color="#cc00ff" style="background: #cc00ff;"></button>
-              <button class="color-btn" data-color="#ff0000" style="background: #ff0000;"></button>
-              <button class="color-btn" data-color="#ff9900" style="background: #ff9900;"></button>
-              <button class="color-btn" data-color="#ffff00" style="background: #ffff00;"></button>
-              <button class="color-btn" data-color="#33ff66" style="background: #33ff66;"></button>
-              <button class="color-btn" data-color="#3399ff" style="background: #3399ff;"></button>
-              <button class="color-btn" data-color="#cc33ff" style="background: #cc33ff;"></button>
+              <button class="color-btn" data-color="#ff1a44" style="background: #ff1a44;"></button>
+              <button class="color-btn" data-color="#ff881a" style="background: #ff881a;"></button>
+              <button class="color-btn" data-color="#ffc800" style="background: #ffc800;"></button>
+              <button class="color-btn" data-color="#ffffff" style="background: #ffffff;"></button>
+              <button class="color-btn" data-color="#ccff1a" style="background: #ccff1a;"></button>
+              <button class="color-btn" data-color="#1aff1a" style="background: #1aff1a;"></button>
+              <button class="color-btn" data-color="#000000" style="background: #000000;"></button>
+              <button class="color-btn" data-color="#1affcc" style="background: #1affcc;"></button>
+              <button class="color-btn" data-color="#1a66ff" style="background: #1a66ff;"></button>
+              <button class="color-btn" data-color="#1a1aff" style="background: #1a1aff;"></button>
+              <button class="color-btn" data-color="#661aff" style="background: #661aff;"></button>
+              <button class="color-btn" data-color="#cc1aff" style="background: #cc1aff;"></button>
+              <button class="color-btn" data-color="#7a7a7a" style="background: #7a7a7a"></button>
             </div>
           </div>
           
