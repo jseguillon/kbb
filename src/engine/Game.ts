@@ -66,7 +66,7 @@ export class Game {
     return this.canvas.height;
   }
 
-constructor(canvas: HTMLCanvasElement) {
+constructor(canvas: HTMLCanvasElement, levelManager?: LevelManager) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d')!;
     
@@ -75,6 +75,7 @@ constructor(canvas: HTMLCanvasElement) {
     this.inputHandler = new InputHandler();
     this.scoreManager = new ScoreManager();
     this.renderer = new Renderer(this.ctx, canvas.width, canvas.height);
+    this.levelManager = levelManager || new LevelManager(0);
     
     this.isMobile = this.detectMobile();
     this.gameSpeed = this.isMobile ? 0.75 : 1.7;
@@ -82,11 +83,11 @@ constructor(canvas: HTMLCanvasElement) {
     this.paddle = new Paddle(canvas.width / 2, canvas.height - 40, 100, 15);
     this.balls = [];
     this.brickManager = new BrickManager(canvas.width, undefined, this.isMobile);
-this.powerUpManager = new PowerUpManager(canvas.width, canvas.height, this);
+ this.powerUpManager = new PowerUpManager(canvas.width, canvas.height, this);
 
-this.gameLoop = new GameLoop(this.update.bind(this), this.draw.bind(this));
+ this.gameLoop = new GameLoop(this.update.bind(this), this.draw.bind(this));
 
-this.inputHandler.addEventListener('keydown', ((e: Event) => this.handleKeydown(e as KeyboardEvent)) as EventListener);
+ this.inputHandler.addEventListener('keydown', ((e: Event) => this.handleKeydown(e as KeyboardEvent)) as EventListener);
     this.inputHandler.addEventListener('keyup', ((e: Event) => this.handleKeyup(e as KeyboardEvent)) as EventListener);
     this.inputHandler.addEventListener('mousedown', ((e: Event) => this.handleClick(e as MouseEvent)) as EventListener);
     canvas.addEventListener('touchend', (e: Event) => this.handleTouchEnd(e as TouchEvent), { passive: false });

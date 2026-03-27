@@ -11,7 +11,7 @@ export type LevelConfig = {
   grid?: (string | null)[][];
 };
 
-const LEVELS: LevelConfig[] = [
+const ALGORITHMIC_LEVELS: LevelConfig[] = [
   {
     rows: 5,
     cols: 8,
@@ -71,27 +71,43 @@ const LEVELS: LevelConfig[] = [
 
 export class LevelManager {
   private levelIndex: number;
-  private configs: LevelConfig[];
+  private algorithmicConfigs: LevelConfig[];
   public customConfig: LevelConfig | null = null;
+  private customLevelName: string = '';
 
-  constructor(initialLevel: number = 0) {
+  constructor(initialLevel: number = 0, customConfig?: LevelConfig) {
     this.levelIndex = initialLevel;
-    this.configs = LEVELS;
+    this.algorithmicConfigs = ALGORITHMIC_LEVELS;
+    if (customConfig) {
+      this.setCustomConfig(customConfig);
+    }
+  }
+
+  setCustomConfig(config: LevelConfig): void {
+    this.customConfig = config;
+    this.customLevelName = config.grid ? 'Custom Level' : `Level ${this.levelIndex + 1}`;
+    this.levelIndex = 0;
   }
 
   getCurrentConfig(): LevelConfig {
     if (this.customConfig) {
       return this.customConfig;
     }
-    return this.configs[this.levelIndex % this.configs.length];
+    return this.algorithmicConfigs[this.levelIndex % this.algorithmicConfigs.length];
   }
 
   nextLevel(): boolean {
+    if (this.customConfig) {
+      return false;
+    }
     this.levelIndex++;
-    return this.levelIndex < this.configs.length;
+    return this.levelIndex < this.algorithmicConfigs.length;
   }
 
   getCurrentLevel(): number {
+    if (this.customConfig) {
+      return 1;
+    }
     return this.levelIndex + 1;
   }
 
@@ -99,18 +115,34 @@ export class LevelManager {
     if (this.customConfig) {
       return 1;
     }
-    return this.configs.length;
+    return this.algorithmicConfigs.length;
+  }
+
+  getCustomLevelName(): string {
+    return this.customLevelName;
   }
 
   reset(): void {
     this.levelIndex = 0;
+    this.customConfig = null;
+    this.customLevelName = '';
   }
 
   isLastLevel(): boolean {
-    return this.levelIndex >= this.configs.length - 1;
+    if (this.customConfig) {
+      return true;
+    }
+    return this.levelIndex >= this.algorithmicConfigs.length - 1;
   }
 
   canContinue(): boolean {
-    return this.levelIndex < this.configs.length;
+    if (this.customConfig) {
+      return false;
+    }
+    return this.levelIndex < this.algorithmicConfigs.length;
+  }
+
+  isCustomLevel(): boolean {
+    return this.customConfig !== null;
   }
 }

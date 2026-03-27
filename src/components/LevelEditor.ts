@@ -1,4 +1,5 @@
 import { LevelEditorManager } from '../logic/LevelEditorManager';
+import { LevelLoader } from '../utils/LevelLoader';
 
 export class LevelEditor {
   private container: HTMLDivElement;
@@ -331,15 +332,34 @@ export class LevelEditor {
   getContainer(): HTMLDivElement {
     return this.container;
   }
-
-  getLevelConfig(): import('../logic/LevelManager').LevelConfig {
-    return this.editorManager.toLevelConfig();
-  }
   
-  private playLevel(): void {
-    const config = this.editorManager.toLevelConfig();
+  private async playLevel(): Promise<void> {
+    const config = await this.getLevelConfig();
+    if (!config) {
+      alert('Please save a level first before playing');
+      return;
+    }
+    
     const encoded = btoa(JSON.stringify(config));
     window.location.href = `/?customLevel=${encoded}`;
+  }
+
+  private async getLevelConfig(): Promise<import('../logic/LevelManager').LevelConfig | null> {
+    const grid = this.editorManager.getGrid();
+    const levelName = this.editorManager.getLevelName() || 'temp-level';
+    
+    try {
+      const levelLoader = new LevelLoader();
+      const config = levelLoader.parseLevelToConfig({
+        name: levelName,
+        grid,
+        colors: levelLoader['extractColors'](grid),
+      });
+      return config;
+    } catch (error) {
+      console.error('Error preparing level for play:', error);
+      return null;
+    }
   }
   
   private detectMobile(): boolean {
