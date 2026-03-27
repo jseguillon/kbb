@@ -1,6 +1,8 @@
 export class KubernetesService {
   private static readonly API_URL = "http://localhost:3001/api/v1/pod/terminate";
   private static readonly STATUS_URL = "http://localhost:3001/status";
+  private static readonly STATUS_CHECK_INTERVAL = 5000;
+  private static lastStatusCheck: number = 0;
   private static status: {
     middleware: string;
     k8s: string;
@@ -26,7 +28,9 @@ export class KubernetesService {
     message: string;
     runningPods: number;
   } | null> {
-    if (this.status) {
+    const now = Date.now();
+    
+    if (now - this.lastStatusCheck < this.STATUS_CHECK_INTERVAL) {
       return this.status;
     }
 
@@ -34,6 +38,7 @@ export class KubernetesService {
       const response = await fetch(this.STATUS_URL);
       const data = await response.json();
       this.status = data;
+      this.lastStatusCheck = now;
       return data;
     } catch (error) {
       this.status = {
@@ -42,6 +47,7 @@ export class KubernetesService {
         message: "Middleware not reachable",
         runningPods: 0,
       };
+      this.lastStatusCheck = now;
       console.log(`Status check failed: ${error instanceof Error ? error.message : "Unknown error"}`);
       return this.status;
     }

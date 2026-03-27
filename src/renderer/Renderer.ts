@@ -6,11 +6,20 @@ export class Renderer {
   lives: number = 3;
   level: number = 1;
   totalLevels: number = 5;
+  private status: any = null;
 
   constructor(ctx: CanvasRenderingContext2D, width: number, height: number) {
     this.ctx = ctx;
     this.width = width;
     this.height = height;
+  }
+
+  setStatus(status: any) {
+    this.status = status;
+  }
+
+  getStatus(): any {
+    return this.status;
   }
 
   setDimensions(width: number, height: number) {
@@ -153,7 +162,7 @@ export class Renderer {
     this.ctx.fillText('Press SPACE or CLICK to play again', this.width / 2, this.height / 2 + 50);
   }
 
-  async drawMenu(game: any) {
+  drawMenu(game: any) {
     this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
     this.ctx.fillRect(0, 0, this.width, this.height);
 
@@ -173,21 +182,7 @@ export class Renderer {
     this.ctx.font = 'bold 24px Arial';
     this.ctx.fillText('Kubernetes Brick Breaker', centerX, startY + 50);
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const simulate = urlParams.get("simulate") === "true";
-    
-    let status: any = null;
-    if (simulate) {
-      status = {
-        middleware: 'simulated',
-        k8s: 'simulated',
-        message: 'Simulated mode',
-        runningPods: 0
-      };
-    } else {
-      status = await game.checkStatus();
-    }
-    this.drawStatusIndicator(centerX, startY + 90, status);
+    this.drawStatusIndicator(centerX, startY + 90, this.status);
 
     this.ctx.font = '18px Arial';
     this.ctx.fillStyle = '#cccccc';

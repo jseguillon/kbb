@@ -533,9 +533,7 @@ this.inputHandler.addEventListener('keydown', ((e: Event) => this.handleKeydown(
     this.renderer.clear();
 
     if (this.gameState.state === GameState.GameStateState.MENU) {
-      this.renderer.drawMenu(this).catch(() => {
-        this.renderer.drawMenuPlaceholder();
-      });
+      this.renderer.drawMenu(this);
     } else if (this.gameState.state === GameState.GameStateState.PLAYING) {
       this.brickManager.draw(this.renderer.ctx);
       this.powerUpManager.draw(this.renderer.ctx);
@@ -675,6 +673,19 @@ this.inputHandler.addEventListener('keydown', ((e: Event) => this.handleKeydown(
 
   start() {
     this.gameLoop.start();
+    const urlParams = new URLSearchParams(window.location.search);
+    const simulate = urlParams.get("simulate") === "true";
+    if (simulate) {
+      this.renderer.setStatus({
+        middleware: 'simulated',
+        k8s: 'simulated',
+        message: 'Simulated mode',
+        runningPods: 0
+      });
+    }
+    if (this.statusRefreshInterval) {
+      clearInterval(this.statusRefreshInterval);
+    }
     this.refreshStatus();
     this.statusRefreshInterval = window.setInterval(() => this.refreshStatus(), 5000);
   }
@@ -688,7 +699,8 @@ this.inputHandler.addEventListener('keydown', ((e: Event) => this.handleKeydown(
   }
 
   private async refreshStatus() {
-    await KubernetesService.checkStatus();
+    const status = await KubernetesService.checkStatus();
+    this.renderer.setStatus(status);
   }
 
   async checkStatus(): Promise<{
@@ -697,6 +709,6 @@ this.inputHandler.addEventListener('keydown', ((e: Event) => this.handleKeydown(
     message: string;
     runningPods: number;
   } | null> {
-    return KubernetesService.checkStatus();
+    return this.renderer.getStatus();
   }
 }
