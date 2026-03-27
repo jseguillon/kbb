@@ -309,19 +309,44 @@ export class LevelEditor {
     const reader = new FileReader();
     reader.onload = (e) => {
       try {
-        const grid = JSON.parse(e.target?.result as string);
-        if (Array.isArray(grid)) {
-          // Load grid data
-          for (let r = 0; r < grid.length; r++) {
-            for (let c = 0; c < grid[r].length; c++) {
-              this.editorManager.setCell(r, c, grid[r][c]);
+        const data = JSON.parse(e.target?.result as string);
+        
+        let grid: (string | null)[][];
+        
+        if (Array.isArray(data)) {
+          // Old format: just the grid array
+          grid = data;
+        } else if (data.grid && Array.isArray(data.grid)) {
+          // New format: object with grid and settings
+          grid = data.grid;
+          
+          // Update settings if available
+          if (data.settings) {
+            console.log('Loaded level with settings:', data.settings);
+          }
+          
+          // Update level name if available
+          if (data.name) {
+            const nameInput = this.container.querySelector('.level-name-input') as HTMLInputElement;
+            if (nameInput) {
+              nameInput.value = data.name;
+              this.editorManager.setLevelName(data.name);
             }
           }
-          this.drawCanvas((this.container.querySelector('#editorCanvas') as HTMLCanvasElement).getContext('2d')!);
-          alert(`Level loaded from ${file.name}`);
         } else {
           alert('Invalid level file format');
+          return;
         }
+        
+        // Load grid data
+        for (let r = 0; r < grid.length; r++) {
+          for (let c = 0; c < grid[r].length; c++) {
+            this.editorManager.setCell(r, c, grid[r][c]);
+          }
+        }
+        
+        this.drawCanvas((this.container.querySelector('#editorCanvas') as HTMLCanvasElement).getContext('2d')!);
+        alert(`Level loaded from ${file.name}`);
       } catch (error) {
         alert('Error parsing level file: ' + (error as Error).message);
       }
