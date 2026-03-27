@@ -41,7 +41,7 @@ export class Game {
   private hasLaser: boolean = false;
   private lasers: Laser[] = [];
   private lastLaserTime: number = 0;
-  private laserCooldown: number = 200;
+  private laserCooldown: number = 400;
   private debugMode: boolean = false;
   private gameSpeed: number = 0.5;
   private speedDisplayTimer: number = 0;
@@ -342,7 +342,16 @@ constructor(canvas: HTMLCanvasElement, levelManager?: LevelManager) {
       return;
     }
     this.brickManager = new BrickManager(this.canvas.width, config, this.isMobile);
-    this.powerUpManager = new PowerUpManager(this.canvas.width, this.canvas.height, this, config.powerUpSpawnRate);
+    this.powerUpManager = new PowerUpManager(
+      this.canvas.width,
+      this.canvas.height,
+      this,
+      config.powerUpSpawnRate,
+      0.6,
+      config.powerUpProbabilities
+    );
+    this.gameSpeed = config.gameSpeed ?? 1.0;
+    this.laserCooldown = config.laserCooldown ?? 200;
     this.hasLaser = false;
     this.lasers = [];
     this.balls.forEach(ball => (ball.speed = config.ballSpeed));

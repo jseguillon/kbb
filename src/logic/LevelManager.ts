@@ -8,6 +8,15 @@ export type LevelConfig = {
   colors: string[];
   ballSpeed: number;
   powerUpSpawnRate: number;
+  powerUpProbabilities?: {
+    wide: number;
+    multi: number;
+    laser: number;
+    slow: number;
+    life: number;
+  };
+  gameSpeed?: number;
+  laserCooldown?: number;
   grid?: (string | null)[][];
 };
 

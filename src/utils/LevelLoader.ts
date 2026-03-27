@@ -4,6 +4,18 @@ export type ParsedLevel = {
   name: string;
   grid: (string | null)[][];
   colors: string[];
+  settings?: {
+    gameSpeed?: number;
+    laserCooldown?: number;
+    powerUpSpawnRate?: number;
+    powerUpProbabilities?: {
+      wide: number;
+      multi: number;
+      laser: number;
+      slow: number;
+      life: number;
+    };
+  };
 };
 
 export class LevelLoader {
@@ -15,11 +27,23 @@ export class LevelLoader {
       if (!response.ok) {
         throw new Error(`Failed to load level: ${response.statusText}`);
       }
-      const grid = await response.json();
+      const data = await response.json();
+      
+      let grid: (string | null)[][];
+      let settings;
+      
+      if (Array.isArray(data)) {
+        grid = data;
+        settings = undefined;
+      } else {
+        grid = data.grid || data;
+        settings = data.settings;
+      }
+      
       const colors = this.extractColors(grid);
       const name = this.extractNameFromPath(filePath);
       
-      return { name, grid, colors };
+      return { name, grid, colors, settings };
     } catch (error) {
       console.error(`Error loading level from ${filePath}:`, error);
       return null;
@@ -79,9 +103,28 @@ export class LevelLoader {
       colors: parsedLevel.colors,
       ballSpeed: 5,
       powerUpSpawnRate: 5,
+      powerUpProbabilities: {
+        wide: 0.25,
+        multi: 0.2,
+        laser: 0.2,
+        slow: 0.25,
+        life: 0.1,
+      },
+      gameSpeed: 1.0,
+      laserCooldown: 400,
       grid: parsedLevel.grid,
     };
 
-    return { ...defaultSettings, ...customSettings };
+    const settings = parsedLevel.settings || {};
+    
+    const mergedSettings: LevelConfig = {
+      ...defaultSettings,
+      gameSpeed: settings.gameSpeed ?? defaultSettings.gameSpeed,
+      laserCooldown: settings.laserCooldown ?? defaultSettings.laserCooldown,
+      powerUpSpawnRate: settings.powerUpSpawnRate ?? defaultSettings.powerUpSpawnRate,
+      powerUpProbabilities: settings.powerUpProbabilities ?? defaultSettings.powerUpProbabilities,
+    };
+
+    return { ...mergedSettings, ...customSettings };
   }
 }

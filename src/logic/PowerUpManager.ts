@@ -11,10 +11,32 @@ export class PowerUpManager {
   private canvasWidth: number;
   private canvasHeight: number;
   private game: Game;
+  private spawnProbabilities: number = 0.6;
+  private powerUpProbabilities: {
+    wide: number;
+    multi: number;
+    laser: number;
+    slow: number;
+    life: number;
+  } = {
+    wide: 0.25,
+    multi: 0.2,
+    laser: 0.2,
+    slow: 0.25,
+    life: 0.1,
+  };
 
-  constructor(canvasWidth: number, canvasHeight: number, game: Game, spawnRate?: number) {
+  constructor(canvasWidth: number, canvasHeight: number, game: Game, spawnRate?: number, spawnProbabilities?: number, powerUpProbabilities?: {
+    wide: number;
+    multi: number;
+    laser: number;
+    slow: number;
+    life: number;
+  }) {
     this.powerUps = [];
     this.spawnRate = spawnRate ?? 5;
+    this.spawnProbabilities = spawnProbabilities ?? 0.6;
+    this.powerUpProbabilities = powerUpProbabilities ?? this.powerUpProbabilities;
     this.lastSpawnBrickIndex = -1;
     this.canvasWidth = canvasWidth;
     this.canvasHeight = canvasHeight;
@@ -31,7 +53,7 @@ export class PowerUpManager {
     this.spawnTimer++;
     if (this.spawnTimer >= this.spawnRate) {
       this.spawnTimer = 0;
-      return Math.random() < 0.6; // 60% chance to spawn when brick is destroyed
+      return Math.random() < this.spawnProbabilities;
     }
     return false;
   }
@@ -52,9 +74,19 @@ export class PowerUpManager {
   }
 
   spawn(x: number, y: number): void {
-    const types: PowerUpType[] = ['wide', 'multi', 'laser', 'slow', 'life'];
-    const type = types[Math.floor(Math.random() * types.length)];
-    this.powerUps.push(new PowerUp(x, y, type, false));
+    const rand = Math.random();
+    let cumulative = 0;
+    let selectedType: PowerUpType = 'wide';
+    
+    for (const [type, probability] of Object.entries(this.powerUpProbabilities)) {
+      cumulative += probability;
+      if (rand < cumulative) {
+        selectedType = type as PowerUpType;
+        break;
+      }
+    }
+    
+    this.powerUps.push(new PowerUp(x, y, selectedType, false));
   }
 
   update(gameSpeed: number = 1.0): void {
@@ -95,12 +127,24 @@ export class PowerUpManager {
     }
   }
 
-reset(spawnRate?: number): void {
+reset(spawnRate?: number, spawnProbabilities?: number, powerUpProbabilities?: {
+    wide: number;
+    multi: number;
+    laser: number;
+    slow: number;
+    life: number;
+  }): void {
     this.powerUps = [];
     this.spawnTimer = 0;
     this.lastSpawnBrickIndex = -1;
     if (spawnRate !== undefined) {
       this.spawnRate = spawnRate;
+    }
+    if (spawnProbabilities !== undefined) {
+      this.spawnProbabilities = spawnProbabilities;
+    }
+    if (powerUpProbabilities !== undefined) {
+      this.powerUpProbabilities = powerUpProbabilities;
     }
   }
 
