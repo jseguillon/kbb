@@ -67,9 +67,10 @@ export class Ball {
   }
 
   bounceOffWall(_canvasHeight: number) {
-    this.dx = -this.dx;
     if (this.y - this.radius < 0) {
       this.dy = -this.dy;
+    } else if (this.x - this.radius < 0 || this.x + this.radius > _canvasHeight * 0.75) {
+      this.dx = -this.dx;
     }
   }
 
