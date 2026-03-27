@@ -11,75 +11,47 @@ export type LevelConfig = {
   grid?: (string | null)[][];
 };
 
-const ALGORITHMIC_LEVELS: LevelConfig[] = [
-  {
-    rows: 5,
-    cols: 8,
-    offsetTop: 60,
-    offsetLeft: 30,
-    padding: 10,
-    brickHeight: 25,
-    colors: ['#ff0044', '#ff6600', '#ffcc00', '#00cc66', '#0066ff'],
-    ballSpeed: 5,
-    powerUpSpawnRate: 5,
-  },
-  {
-    rows: 6,
-    cols: 10,
-    offsetTop: 50,
-    offsetLeft: 20,
-    padding: 8,
-    brickHeight: 22,
-    colors: ['#ff0044', '#ff6600', '#ffcc00', '#00cc66', '#0066ff', '#cc00ff'],
-    ballSpeed: 5.5,
-    powerUpSpawnRate: 4,
-  },
-  {
-    rows: 7,
-    cols: 10,
-    offsetTop: 45,
-    offsetLeft: 15,
-    padding: 7,
-    brickHeight: 20,
-    colors: ['#ff3300', '#ff9900', '#ffff00', '#33ff66', '#3399ff', '#cc33ff'],
-    ballSpeed: 6,
-    powerUpSpawnRate: 3,
-  },
-  {
-    rows: 8,
-    cols: 12,
-    offsetTop: 40,
-    offsetLeft: 10,
-    padding: 6,
-    brickHeight: 18,
-    colors: ['#ff0000', '#ff6600', '#ffcc00', '#ffff00', '#00ff66', '#00ccff', '#6666ff', '#cc00ff'],
-    ballSpeed: 6.5,
-    powerUpSpawnRate: 3,
-  },
-  {
-    rows: 9,
-    cols: 12,
-    offsetTop: 35,
-    offsetLeft: 5,
-    padding: 5,
-    brickHeight: 16,
-    colors: ['#ff0000', '#ff4400', '#ff8800', '#ffcc00', '#ffff00', '#00ff44', '#00ccff', '#6666ff', '#cc00ff'],
-    ballSpeed: 7,
-    powerUpSpawnRate: 2,
-  },
-];
-
 export class LevelManager {
   private levelIndex: number;
-  private algorithmicConfigs: LevelConfig[];
+  private fileBasedConfigs: LevelConfig[] = [];
   public customConfig: LevelConfig | null = null;
   private customLevelName: string = '';
+  private levelLoader: import('../utils/LevelLoader').LevelLoader | null = null;
+  private fileLevelsLoaded: boolean = false;
 
   constructor(initialLevel: number = 0, customConfig?: LevelConfig) {
     this.levelIndex = initialLevel;
-    this.algorithmicConfigs = ALGORITHMIC_LEVELS;
+    this.levelLoader = null;
+    this.fileLevelsLoaded = false;
+    
     if (customConfig) {
       this.setCustomConfig(customConfig);
+    } else {
+      this.loadFileBasedLevels();
+    }
+  }
+
+  private async loadFileBasedLevels(): Promise<void> {
+    if (this.fileLevelsLoaded) return;
+    
+    try {
+      const LevelLoaderModule = await import('../utils/LevelLoader');
+      this.levelLoader = new LevelLoaderModule.LevelLoader();
+      const levels = await this.levelLoader.listAvailableLevels();
+      
+      for (const level of levels) {
+        const parsed = await this.levelLoader.loadLevelById(level.id);
+        if (parsed) {
+          const config = this.levelLoader.parseLevelToConfig(parsed);
+          this.fileBasedConfigs.push(config);
+        }
+      }
+      
+      this.fileLevelsLoaded = true;
+    } catch (error) {
+      console.error('Could not load file-based levels:', error);
+      this.fileBasedConfigs = [];
+      this.fileLevelsLoaded = true;
     }
   }
 
@@ -89,19 +61,22 @@ export class LevelManager {
     this.levelIndex = 0;
   }
 
-  getCurrentConfig(): LevelConfig {
+  getCurrentConfig(): LevelConfig | null {
     if (this.customConfig) {
       return this.customConfig;
     }
-    return this.algorithmicConfigs[this.levelIndex % this.algorithmicConfigs.length];
+    if (!this.fileLevelsLoaded || this.fileBasedConfigs.length === 0) {
+      return null;
+    }
+    return this.fileBasedConfigs[this.levelIndex];
   }
 
-  nextLevel(): boolean {
+  async nextLevel(): Promise<boolean> {
     if (this.customConfig) {
       return false;
     }
     this.levelIndex++;
-    return this.levelIndex < this.algorithmicConfigs.length;
+    return this.levelIndex < this.fileBasedConfigs.length;
   }
 
   getCurrentLevel(): number {
@@ -115,7 +90,7 @@ export class LevelManager {
     if (this.customConfig) {
       return 1;
     }
-    return this.algorithmicConfigs.length;
+    return this.fileBasedConfigs.length;
   }
 
   getCustomLevelName(): string {
@@ -126,20 +101,21 @@ export class LevelManager {
     this.levelIndex = 0;
     this.customConfig = null;
     this.customLevelName = '';
+    this.fileLevelsLoaded = false;
   }
 
   isLastLevel(): boolean {
     if (this.customConfig) {
       return true;
     }
-    return this.levelIndex >= this.algorithmicConfigs.length - 1;
+    return this.levelIndex >= this.fileBasedConfigs.length - 1;
   }
 
   canContinue(): boolean {
     if (this.customConfig) {
       return false;
     }
-    return this.levelIndex < this.algorithmicConfigs.length;
+    return this.levelIndex < this.fileBasedConfigs.length;
   }
 
   isCustomLevel(): boolean {

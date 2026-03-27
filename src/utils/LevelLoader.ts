@@ -34,10 +34,14 @@ export class LevelLoader {
   async listAvailableLevels(): Promise<Array<{ id: number; name: string }>> {
     const levels = [];
     for (let i = 1; i <= 100; i++) {
-      const level = await this.loadLevelById(i);
-      if (level) {
-        levels.push({ id: i, name: level.name });
-      } else {
+      try {
+        const response = await fetch(`${this.levelsDir}${i}.json`);
+        if (!response.ok || !response.headers.get('content-type')?.includes('application/json')) {
+          break;
+        }
+        const name = this.extractNameFromPath(`${this.levelsDir}${i}.json`);
+        levels.push({ id: i, name });
+      } catch (error) {
         break;
       }
     }

@@ -49,7 +49,7 @@ export class LevelEditor {
           <div class="color-selector">
             <h3>Select Brick Color</h3>
             <div class="color-grid">
-              <button class="color-btn" data-color="#ff1a44" style="background: #ff1a44;"></button>
+              <button class="color-btn" data-color="#ff0044" style="background: #ff0044;"></button>
               <button class="color-btn" data-color="#ff881a" style="background: #ff881a;"></button>
               <button class="color-btn" data-color="#ffc800" style="background: #ffc800;"></button>
               <button class="color-btn" data-color="#ffffff" style="background: #ffffff;"></button>

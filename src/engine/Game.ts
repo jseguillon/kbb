@@ -316,11 +316,12 @@ constructor(canvas: HTMLCanvasElement, levelManager?: LevelManager) {
         this.renderer.setTotalLevels(1);
       } catch (error) {
         console.error('Failed to load custom level:', error);
-        this.levelManager = new LevelManager(0);
-        this.renderer.setTotalLevels(this.levelManager.getTotalLevels());
+        this.renderer.setTotalLevels(this.levelManager ? this.levelManager.getTotalLevels() : 0);
       }
     } else {
-      this.levelManager = new LevelManager(0);
+      if (!this.levelManager) {
+        this.levelManager = new LevelManager(0);
+      }
       this.renderer.setTotalLevels(this.levelManager.getTotalLevels());
     }
     
@@ -336,6 +337,10 @@ constructor(canvas: HTMLCanvasElement, levelManager?: LevelManager) {
 
   private loadLevel(_levelIndex: number): void {
     const config = this.customLevelConfig || this.levelManager!.getCurrentConfig();
+    if (!config) {
+      console.error('No config available for level');
+      return;
+    }
     this.brickManager = new BrickManager(this.canvas.width, config, this.isMobile);
     this.powerUpManager = new PowerUpManager(this.canvas.width, this.canvas.height, this, config.powerUpSpawnRate);
     this.hasLaser = false;
@@ -503,7 +508,9 @@ constructor(canvas: HTMLCanvasElement, levelManager?: LevelManager) {
         setTimeout(() => {
           this.balls.forEach(ball => {
             const config = this.levelManager!.getCurrentConfig();
-            ball.speed = config.ballSpeed;
+            if (config) {
+              ball.speed = config.ballSpeed;
+            }
           });
         }, 10000);
         break;
@@ -579,10 +586,10 @@ constructor(canvas: HTMLCanvasElement, levelManager?: LevelManager) {
     this.renderer.ctx.shadowBlur = 0;
   }
 
-  private handleLevelComplete(): void {
+  private async handleLevelComplete(): Promise<void> {
     if (this.customLevelConfig) {
       this.gameState = GameState.createCustomWin();
-    } else if (this.levelManager!.nextLevel()) {
+    } else if (await this.levelManager!.nextLevel()) {
       this.gameState = GameState.createLevelComplete();
     } else {
       this.gameState = GameState.createWin();
