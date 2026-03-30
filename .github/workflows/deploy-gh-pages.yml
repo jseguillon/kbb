@@ -2,8 +2,8 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches-ignore:
-      - feature/*
+    branches:
+      - main
       - develop
   workflow_dispatch:
 
