@@ -5,7 +5,7 @@ test.describe('Level Editor New Format Support', () => {
     await page.goto('/editor');
     
     // Save a level
-    const saveButton = page.getByRole('button', { name: 'Save' });
+    const saveButton = page.getByRole('button', { name: 'Save Level' });
     await saveButton.click();
     
     // Verify settings are saved in new format
@@ -25,7 +25,7 @@ test.describe('Level Editor New Format Support', () => {
   test('should save level with default game speed', async ({ page }) => {
     await page.goto('/editor');
     
-    const saveButton = page.getByRole('button', { name: 'Save' });
+    const saveButton = page.getByRole('button', { name: 'Save Level' });
     await saveButton.click();
     
     const savedLevels = await page.evaluate(() => {
@@ -39,7 +39,7 @@ test.describe('Level Editor New Format Support', () => {
   test('should save level with default laser cooldown', async ({ page }) => {
     await page.goto('/editor');
     
-    const saveButton = page.getByRole('button', { name: 'Save' });
+    const saveButton = page.getByRole('button', { name: 'Save Level' });
     await saveButton.click();
     
     const savedLevels = await page.evaluate(() => {
@@ -53,7 +53,7 @@ test.describe('Level Editor New Format Support', () => {
   test('should save level with default power-up spawn rate', async ({ page }) => {
     await page.goto('/editor');
     
-    const saveButton = page.getByRole('button', { name: 'Save' });
+    const saveButton = page.getByRole('button', { name: 'Save Level' });
     await saveButton.click();
     
     const savedLevels = await page.evaluate(() => {
@@ -67,7 +67,7 @@ test.describe('Level Editor New Format Support', () => {
   test('should save level with default power-up probabilities', async ({ page }) => {
     await page.goto('/editor');
     
-    const saveButton = page.getByRole('button', { name: 'Save' });
+    const saveButton = page.getByRole('button', { name: 'Save Level' });
     await saveButton.click();
     
     const savedLevels = await page.evaluate(() => {
@@ -116,7 +116,7 @@ test.describe('Level Editor New Format Support', () => {
     await page.goto('/editor');
     
     // Save a new format level
-    const saveButton = page.getByRole('button', { name: 'Save' });
+    const saveButton = page.getByRole('button', { name: 'Save Level' });
     await saveButton.click();
     
     // Load it back using the Load button
@@ -138,14 +138,11 @@ test.describe('Level Editor New Format Support', () => {
     // Clear any existing levels
     await page.evaluate(() => localStorage.removeItem('kbb_custom_levels'));
     
-    // Set level name - need to trigger input event
+    // Set level name
     const nameInput = page.locator('.level-name-input');
-    await nameInput.fill('');
     await nameInput.fill('Unique Test Level Name');
-    await nameInput.dispatchEvent('input');
-    await nameInput.dispatchEvent('change');
     
-    const saveButton = page.getByRole('button', { name: 'Save' });
+    const saveButton = page.getByRole('button', { name: 'Save Level' });
     await saveButton.click();
     
     const savedLevels = await page.evaluate(() => {
@@ -171,7 +168,7 @@ test.describe('Level Editor New Format Support', () => {
     });
     
     // Save new format
-    const saveButton = page.getByRole('button', { name: 'Save' });
+    const saveButton = page.getByRole('button', { name: 'Save Level' });
     await saveButton.click();
     
     const savedLevels = await page.evaluate(() => {
@@ -193,7 +190,7 @@ test.describe('Level Editor New Format Support', () => {
     await page.goto('/editor');
     
     // Save the level first
-    const saveButton = page.getByRole('button', { name: 'Save' });
+    const saveButton = page.getByRole('button', { name: 'Save Level' });
     await saveButton.click();
     
     // Get saved level data

@@ -1,0 +1,23 @@
+{
+  "metadata": {
+    "name": "Level 9 - Hardcore",
+    "description": "Extremely difficult level with fast speed, rare power-ups (spawn every 8 bricks), and low probabilities"
+  },
+  "settings": {
+    "gameSpeed": 1.1,
+    "laserCooldown": 250,
+    "powerUpSpawnRate": 8,
+    "powerUpProbabilities": {
+      "wide": 0.15,
+      "multi": 0.15,
+      "laser": 0.25,
+      "slow": 0.15,
+      "life": 0.1
+    }
+  },
+  "grid": [
+    ["#ff3300", "#ff3300", "#ff3300", "#ff3300", "#ff3300", "#ff3300", "#ff3300", "#ff3300", "#ff3300", "#ff3300", "#ff3300", "#ff3300", "#ff3300", "#ff3300", "#ff3300", "#ff3300", "#ff3300", "#ff3300", "#ff3300", "#ff3300", "#ff3300", "#ff3300", "#ff3300", "#ff3300"],
+    ["#ff3300", "#ff3300", "#ff3300", "#ff3300", "#ff3300", "#ff3300", "#ff3300", "#ff3300", "#ff3300", "#ff3300", "#ff3300", "#ff3300", "#ff3300", "#ff3300", "#ff3300", "#ff3300", "#ff3300", "#ff3300", "#ff3300", "#ff3300", "#ff3300", "#ff3300", "#ff3300", "#ff3300"],
+    ["#ff3300", "#ff3300", "#ff3300", "#ff3300", "#ff3300", "#ff3300", "#ff3300", "#ff3300", "#ff3300", "#ff3300", "#ff3300", "#ff3300", "#ff3300", "#ff3300", "#ff3300", "#ff3300", "#ff3300", "#ff3300", "#ff3300", "#ff3300", "#ff3300", "#ff3300", "#ff3300", "#ff3300"]
+  ]
+}

@@ -220,3 +220,77 @@
   color: #888;
   font-size: 14px;
 }
+
+.editor-settings {
+  margin: 20px 0;
+  border-top: 1px solid #333;
+  padding-top: 20px;
+}
+
+.btn-settings {
+  width: 100%;
+  padding: 12px;
+  background: #4a4a6a;
+  border: none;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-settings:hover {
+  background: #5a5a7a;
+}
+
+.settings-panel {
+  background: #2a2a3e;
+  padding: 15px;
+  border-radius: 4px;
+  margin-top: 10px;
+}
+
+.settings-panel h3 {
+  margin: 0 0 15px 0;
+  font-size: 16px;
+  color: #00ccff;
+}
+
+.setting-item {
+  margin-bottom: 15px;
+}
+
+.setting-item label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 14px;
+  color: #ccc;
+}
+
+.setting-item input[type="range"] {
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  background: #3a3a4e;
+  outline: none;
+  -webkit-appearance: none;
+}
+
+.setting-item input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #00ccff;
+  cursor: pointer;
+}
+
+.setting-item input[type="range"]::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #00ccff;
+  cursor: pointer;
+  border: none;
+}

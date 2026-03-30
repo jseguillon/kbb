@@ -148,28 +148,43 @@ export class LevelEditorManager {
   }
 
   saveLevel(index: number): void {
+    const settings = this.getSettingsFromUI();
+    
     const levelData: EditorLevel = {
       name: this.currentLevelName,
       grid: this.getGrid(),
       rows: this.gridSize.rows,
       cols: this.gridSize.cols,
-      settings: {
-        gameSpeed: 1.0,
-        laserCooldown: 400,
-        powerUpSpawnRate: 5,
-        powerUpProbabilities: {
-          wide: 0.25,
-          multi: 0.2,
-          laser: 0.2,
-          slow: 0.25,
-          life: 0.1,
-        },
-      },
+      settings,
     };
 
     const levels = this.getSavedLevels();
     levels[index] = levelData;
     localStorage.setItem('kbb_custom_levels', JSON.stringify(levels));
+  }
+
+  getSettingsFromUI(): EditorLevel['settings'] {
+    const gameSpeedSlider = document.querySelector('#game-speed') as HTMLInputElement;
+    const laserCooldownSlider = document.querySelector('#laser-cooldown') as HTMLInputElement;
+    const spawnRateSlider = document.querySelector('#spawn-rate') as HTMLInputElement;
+    const wideProbSlider = document.querySelector('#wide-prob') as HTMLInputElement;
+    const multiProbSlider = document.querySelector('#multi-prob') as HTMLInputElement;
+    const laserProbSlider = document.querySelector('#laser-prob') as HTMLInputElement;
+    const slowProbSlider = document.querySelector('#slow-prob') as HTMLInputElement;
+    const lifeProbSlider = document.querySelector('#life-prob') as HTMLInputElement;
+    
+    return {
+      gameSpeed: gameSpeedSlider ? parseFloat(gameSpeedSlider.value) : 1.0,
+      laserCooldown: laserCooldownSlider ? parseInt(laserCooldownSlider.value) : 400,
+      powerUpSpawnRate: spawnRateSlider ? parseInt(spawnRateSlider.value) : 5,
+      powerUpProbabilities: {
+        wide: wideProbSlider ? parseFloat(wideProbSlider.value) : 0.25,
+        multi: multiProbSlider ? parseFloat(multiProbSlider.value) : 0.2,
+        laser: laserProbSlider ? parseFloat(laserProbSlider.value) : 0.2,
+        slow: slowProbSlider ? parseFloat(slowProbSlider.value) : 0.25,
+        life: lifeProbSlider ? parseFloat(lifeProbSlider.value) : 0.1,
+      },
+    };
   }
 
   getSavedLevels(): EditorLevel[] {

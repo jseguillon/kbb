@@ -1,4 +1,4 @@
-import { LevelEditorManager } from '../logic/LevelEditorManager';
+import { LevelEditorManager, type EditorLevel } from '../logic/LevelEditorManager';
 import { LevelLoader } from '../utils/LevelLoader';
 
 export class LevelEditor {
@@ -68,6 +68,53 @@ export class LevelEditor {
           <div class="save-load-section">
             <h3>Save / Load Levels</h3>
             <div class="saved-levels-list"></div>
+          </div>
+          
+          <div class="editor-settings">
+            <button class="btn-settings" data-action="toggle-settings">⚙️ Level Settings</button>
+            <div class="settings-panel" style="display: none;">
+              <h3>Level Settings</h3>
+              
+              <div class="setting-item">
+                <label>Game Speed: <span id="game-speed-value">1.0</span></label>
+                <input type="range" id="game-speed" min="0.25" max="3.0" step="0.25" value="1.0">
+              </div>
+              
+              <div class="setting-item">
+                <label>Laser Cooldown: <span id="laser-cooldown-value">400</span>ms</label>
+                <input type="range" id="laser-cooldown" min="100" max="1000" step="50" value="400">
+              </div>
+              
+              <div class="setting-item">
+                <label>Power-up Spawn Rate: <span id="spawn-rate-value">5</span></label>
+                <input type="range" id="spawn-rate" min="2" max="10" step="1" value="5">
+              </div>
+              
+              <div class="setting-item">
+                <label>Wide Power-up: <span id="wide-prob-value">0.25</span></label>
+                <input type="range" id="wide-prob" min="0" max="1" step="0.05" value="0.25">
+              </div>
+              
+              <div class="setting-item">
+                <label>Multi Power-up: <span id="multi-prob-value">0.20</span></label>
+                <input type="range" id="multi-prob" min="0" max="1" step="0.05" value="0.20">
+              </div>
+              
+              <div class="setting-item">
+                <label>Laser Power-up: <span id="laser-prob-value">0.20</span></label>
+                <input type="range" id="laser-prob" min="0" max="1" step="0.05" value="0.20">
+              </div>
+              
+              <div class="setting-item">
+                <label>Slow Power-up: <span id="slow-prob-value">0.25</span></label>
+                <input type="range" id="slow-prob" min="0" max="1" step="0.05" value="0.25">
+              </div>
+              
+              <div class="setting-item">
+                <label>Life Power-up: <span id="life-prob-value">0.10</span></label>
+                <input type="range" id="life-prob" min="0" max="1" step="0.05" value="0.10">
+              </div>
+            </div>
           </div>
           
           <div class="editor-help">
@@ -182,9 +229,15 @@ export class LevelEditor {
       }
       
 // Level name input
-        if (target.classList.contains('level-name-input')) {
-          this.editorManager.setLevelName((target as HTMLInputElement).value);
-        }
+      if (target.classList.contains('level-name-input')) {
+        this.editorManager.setLevelName((target as HTMLInputElement).value);
+      }
+    });
+    
+    // Level name input event listener
+    const nameInput = this.container.querySelector('.level-name-input') as HTMLInputElement;
+    nameInput?.addEventListener('input', () => {
+      this.editorManager.setLevelName(nameInput.value);
     });
     
     // Saved levels list events
@@ -194,6 +247,7 @@ export class LevelEditor {
         const index = parseInt(target.dataset.index || '0');
         if (this.editorManager.loadLevel(index)) {
           this.drawCanvas(ctx);
+          this.loadSettingsFromLevel();
         }
       }
       if (target.classList.contains('btn-delete-level')) {
@@ -213,6 +267,55 @@ export class LevelEditor {
       if (file) {
         this.loadFromFile(file);
       }
+    });
+    
+    // Settings panel toggle
+    const settingsPanel = this.container.querySelector('.settings-panel') as HTMLDivElement;
+    const settingsBtn = this.container.querySelector('.btn-settings') as HTMLButtonElement;
+    
+    settingsBtn?.addEventListener('click', () => {
+      const isHidden = settingsPanel.style.display === 'none';
+      settingsPanel.style.display = isHidden ? 'block' : 'none';
+    });
+    
+    // Game speed slider
+    const gameSpeedSlider = this.container.querySelector('#game-speed') as HTMLInputElement;
+    const gameSpeedValue = this.container.querySelector('#game-speed-value') as HTMLSpanElement;
+    gameSpeedSlider?.addEventListener('input', (e) => {
+      const value = parseFloat((e.target as HTMLInputElement).value);
+      gameSpeedValue.textContent = value.toFixed(2);
+    });
+    
+    // Laser cooldown slider
+    const laserCooldownSlider = this.container.querySelector('#laser-cooldown') as HTMLInputElement;
+    const laserCooldownValue = this.container.querySelector('#laser-cooldown-value') as HTMLSpanElement;
+    laserCooldownSlider?.addEventListener('input', (e) => {
+      const value = parseInt((e.target as HTMLInputElement).value);
+      laserCooldownValue.textContent = value.toString();
+    });
+    
+    // Spawn rate slider
+    const spawnRateSlider = this.container.querySelector('#spawn-rate') as HTMLInputElement;
+    const spawnRateValue = this.container.querySelector('#spawn-rate-value') as HTMLSpanElement;
+    spawnRateSlider?.addEventListener('input', (e) => {
+      const value = parseInt((e.target as HTMLInputElement).value);
+      spawnRateValue.textContent = value.toString();
+    });
+    
+    // Power-up probability sliders
+    const probSliders: { slider: HTMLInputElement; display: HTMLSpanElement }[] = [
+      { slider: this.container.querySelector('#wide-prob')!, display: this.container.querySelector('#wide-prob-value')! },
+      { slider: this.container.querySelector('#multi-prob')!, display: this.container.querySelector('#multi-prob-value')! },
+      { slider: this.container.querySelector('#laser-prob')!, display: this.container.querySelector('#laser-prob-value')! },
+      { slider: this.container.querySelector('#slow-prob')!, display: this.container.querySelector('#slow-prob-value')! },
+      { slider: this.container.querySelector('#life-prob')!, display: this.container.querySelector('#life-prob-value')! },
+    ];
+    
+    probSliders.forEach(({ slider, display }) => {
+      slider.addEventListener('input', (e) => {
+        const value = parseFloat((e.target as HTMLInputElement).value);
+        display.textContent = value.toFixed(2);
+      });
     });
   }
 
@@ -264,6 +367,122 @@ export class LevelEditor {
     `).join('');
   }
 
+  private updateSettingsFromData(settings: EditorLevel['settings']): void {
+    const gameSpeedSlider = document.querySelector('#game-speed') as HTMLInputElement;
+    const laserCooldownSlider = document.querySelector('#laser-cooldown') as HTMLInputElement;
+    const spawnRateSlider = document.querySelector('#spawn-rate') as HTMLInputElement;
+    const wideProbSlider = document.querySelector('#wide-prob') as HTMLInputElement;
+    const multiProbSlider = document.querySelector('#multi-prob') as HTMLInputElement;
+    const laserProbSlider = document.querySelector('#laser-prob') as HTMLInputElement;
+    const slowProbSlider = document.querySelector('#slow-prob') as HTMLInputElement;
+    const lifeProbSlider = document.querySelector('#life-prob') as HTMLInputElement;
+    
+    const gameSpeedValue = document.querySelector('#game-speed-value') as HTMLSpanElement;
+    const laserCooldownValue = document.querySelector('#laser-cooldown-value') as HTMLSpanElement;
+    const spawnRateValue = document.querySelector('#spawn-rate-value') as HTMLSpanElement;
+    const wideProbValue = document.querySelector('#wide-prob-value') as HTMLSpanElement;
+    const multiProbValue = document.querySelector('#multi-prob-value') as HTMLSpanElement;
+    const laserProbValue = document.querySelector('#laser-prob-value') as HTMLSpanElement;
+    const slowProbValue = document.querySelector('#slow-prob-value') as HTMLSpanElement;
+    const lifeProbValue = document.querySelector('#life-prob-value') as HTMLSpanElement;
+    
+    if (!settings) return;
+    
+    if (gameSpeedSlider && gameSpeedValue) {
+      gameSpeedSlider.value = (settings.gameSpeed ?? 1.0).toString();
+      gameSpeedValue.textContent = (settings.gameSpeed ?? 1.0).toFixed(2);
+    }
+    if (laserCooldownSlider && laserCooldownValue) {
+      laserCooldownSlider.value = (settings.laserCooldown ?? 400).toString();
+      laserCooldownValue.textContent = (settings.laserCooldown ?? 400).toString();
+    }
+    if (spawnRateSlider && spawnRateValue) {
+      spawnRateSlider.value = (settings.powerUpSpawnRate ?? 5).toString();
+      spawnRateValue.textContent = (settings.powerUpSpawnRate ?? 5).toString();
+    }
+    if (wideProbSlider && wideProbValue && settings.powerUpProbabilities) {
+      wideProbSlider.value = (settings.powerUpProbabilities.wide ?? 0.25).toString();
+      wideProbValue.textContent = (settings.powerUpProbabilities.wide ?? 0.25).toFixed(2);
+    }
+    if (multiProbSlider && multiProbValue && settings.powerUpProbabilities) {
+      multiProbSlider.value = (settings.powerUpProbabilities.multi ?? 0.2).toString();
+      multiProbValue.textContent = (settings.powerUpProbabilities.multi ?? 0.2).toFixed(2);
+    }
+    if (laserProbSlider && laserProbValue && settings.powerUpProbabilities) {
+      laserProbSlider.value = (settings.powerUpProbabilities.laser ?? 0.2).toString();
+      laserProbValue.textContent = (settings.powerUpProbabilities.laser ?? 0.2).toFixed(2);
+    }
+    if (slowProbSlider && slowProbValue && settings.powerUpProbabilities) {
+      slowProbSlider.value = (settings.powerUpProbabilities.slow ?? 0.25).toString();
+      slowProbValue.textContent = (settings.powerUpProbabilities.slow ?? 0.25).toFixed(2);
+    }
+    if (lifeProbSlider && lifeProbValue && settings.powerUpProbabilities) {
+      lifeProbSlider.value = (settings.powerUpProbabilities.life ?? 0.1).toString();
+      lifeProbValue.textContent = (settings.powerUpProbabilities.life ?? 0.1).toFixed(2);
+    }
+  }
+
+  private loadSettingsFromLevel(): void {
+    const levels = this.editorManager.getSavedLevels();
+    if (levels.length === 0) return;
+    
+    const currentLevel = levels[levels.length - 1];
+    if (!currentLevel.settings) return;
+    
+    const settings = currentLevel.settings!;
+    
+    const gameSpeedSlider = document.querySelector('#game-speed') as HTMLInputElement;
+    const laserCooldownSlider = document.querySelector('#laser-cooldown') as HTMLInputElement;
+    const spawnRateSlider = document.querySelector('#spawn-rate') as HTMLInputElement;
+    const wideProbSlider = document.querySelector('#wide-prob') as HTMLInputElement;
+    const multiProbSlider = document.querySelector('#multi-prob') as HTMLInputElement;
+    const laserProbSlider = document.querySelector('#laser-prob') as HTMLInputElement;
+    const slowProbSlider = document.querySelector('#slow-prob') as HTMLInputElement;
+    const lifeProbSlider = document.querySelector('#life-prob') as HTMLInputElement;
+    
+    const gameSpeedValue = document.querySelector('#game-speed-value') as HTMLSpanElement;
+    const laserCooldownValue = document.querySelector('#laser-cooldown-value') as HTMLSpanElement;
+    const spawnRateValue = document.querySelector('#spawn-rate-value') as HTMLSpanElement;
+    const wideProbValue = document.querySelector('#wide-prob-value') as HTMLSpanElement;
+    const multiProbValue = document.querySelector('#multi-prob-value') as HTMLSpanElement;
+    const laserProbValue = document.querySelector('#laser-prob-value') as HTMLSpanElement;
+    const slowProbValue = document.querySelector('#slow-prob-value') as HTMLSpanElement;
+    const lifeProbValue = document.querySelector('#life-prob-value') as HTMLSpanElement;
+    
+    if (gameSpeedSlider && gameSpeedValue && settings.gameSpeed !== undefined) {
+      gameSpeedSlider.value = settings.gameSpeed.toString();
+      gameSpeedValue.textContent = settings.gameSpeed.toFixed(2);
+    }
+    if (laserCooldownSlider && laserCooldownValue && settings.laserCooldown !== undefined) {
+      laserCooldownSlider.value = settings.laserCooldown.toString();
+      laserCooldownValue.textContent = settings.laserCooldown.toString();
+    }
+    if (spawnRateSlider && spawnRateValue && settings.powerUpSpawnRate !== undefined) {
+      spawnRateSlider.value = settings.powerUpSpawnRate.toString();
+      spawnRateValue.textContent = settings.powerUpSpawnRate.toString();
+    }
+    if (wideProbSlider && wideProbValue && settings.powerUpProbabilities?.wide !== undefined) {
+      wideProbSlider.value = settings.powerUpProbabilities.wide.toString();
+      wideProbValue.textContent = settings.powerUpProbabilities.wide.toFixed(2);
+    }
+    if (multiProbSlider && multiProbValue && settings.powerUpProbabilities?.multi !== undefined) {
+      multiProbSlider.value = settings.powerUpProbabilities.multi.toString();
+      multiProbValue.textContent = settings.powerUpProbabilities.multi.toFixed(2);
+    }
+    if (laserProbSlider && laserProbValue && settings.powerUpProbabilities?.laser !== undefined) {
+      laserProbSlider.value = settings.powerUpProbabilities.laser.toString();
+      laserProbValue.textContent = settings.powerUpProbabilities.laser.toFixed(2);
+    }
+    if (slowProbSlider && slowProbValue && settings.powerUpProbabilities?.slow !== undefined) {
+      slowProbSlider.value = settings.powerUpProbabilities.slow.toString();
+      slowProbValue.textContent = settings.powerUpProbabilities.slow.toFixed(2);
+    }
+    if (lifeProbSlider && lifeProbValue && settings.powerUpProbabilities?.life !== undefined) {
+      lifeProbSlider.value = settings.powerUpProbabilities.life.toString();
+      lifeProbValue.textContent = settings.powerUpProbabilities.life.toFixed(2);
+    }
+  }
+
   private showLoadDialog(): void {
     const levels = this.editorManager.getSavedLevels();
     
@@ -285,8 +504,15 @@ export class LevelEditor {
   }
 
   private downloadLevel(): void {
-    const levelData = this.editorManager.getGrid();
+    const settings = this.editorManager.getSettingsFromUI();
     const levelName = this.editorManager.getLevelName() || 'level';
+    const levelData: EditorLevel = {
+      name: levelName,
+      grid: this.editorManager.getGrid(),
+      rows: this.editorManager.getGridSize().rows,
+      cols: this.editorManager.getGridSize().cols,
+      settings,
+    };
     const jsonString = JSON.stringify(levelData, null, 2);
     const blob = new Blob([jsonString], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -332,6 +558,12 @@ export class LevelEditor {
               nameInput.value = data.name;
               this.editorManager.setLevelName(data.name);
             }
+          }
+          
+          // Update settings if available
+          if (data.settings) {
+            console.log('Loaded level with settings:', data.settings);
+            this.updateSettingsFromData(data.settings);
           }
         } else {
           alert('Invalid level file format');
