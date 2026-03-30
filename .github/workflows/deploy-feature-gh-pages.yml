@@ -12,7 +12,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: "pages-feature-${{ github.ref_name }}"
+  group: "pages"
   cancel-in-progress: true
 
 jobs:
@@ -38,21 +38,18 @@ jobs:
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: build-${{ github.ref_name }}
+          name: build
           path: ./dist
 
   deploy:
     name: Deploy ${{ github.ref_name }}
     needs: build
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Download build artifact
         uses: actions/download-artifact@v4
         with:
-          name: build-${{ github.ref_name }}
+          name: build
           path: ./dist
 
       - name: Setup Pages
