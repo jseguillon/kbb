@@ -20,6 +20,9 @@ export class LevelEditor {
       this.brickHeight = 25;
       this.padding = 1;
     }
+    
+    this.restoreLevelFromStorage();
+    
     this.container = this.createContainer();
     this.setupEventListeners();
   }
@@ -138,6 +141,39 @@ export class LevelEditor {
     `;
     
     return container;
+  }
+
+  private restoreLevelFromStorage(): void {
+    const savedGrid = localStorage.getItem('editorGrid');
+    const savedLevelName = localStorage.getItem('editorLevelName');
+    
+    if (savedGrid) {
+      try {
+        const grid: (string | null)[][] = JSON.parse(savedGrid);
+        const rows = grid.length;
+        const cols = grid[0]?.length || 0;
+        
+        // Create new grid with saved dimensions
+        this.editorManager.reset();
+        
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
+            if (r < this.editorManager.getGridSize().rows && c < this.editorManager.getGridSize().cols) {
+              this.editorManager.setCell(r, c, grid[r][c]);
+            }
+          }
+        }
+        
+        console.log('Restored grid from storage');
+      } catch (error) {
+        console.error('Failed to restore grid:', error);
+      }
+    }
+    
+    if (savedLevelName) {
+      this.editorManager.setLevelName(savedLevelName);
+      console.log(`Restored level name: ${savedLevelName}`);
+    }
   }
 
   private setupEventListeners(): void {
@@ -597,8 +633,23 @@ export class LevelEditor {
       return;
     }
     
+    const grid = this.editorManager.getGrid();
+    const settings = this.editorManager.getSettingsFromUI();
+    const levelName = this.editorManager.getLevelName() || 'temp-level';
+    
+    localStorage.setItem('editorGrid', JSON.stringify(grid));
+    localStorage.setItem('editorSettings', JSON.stringify(settings));
+    localStorage.setItem('editorLevelName', levelName);
+    
     const encoded = btoa(JSON.stringify(config));
     window.location.href = `./?customLevel=${encoded}`;
+    
+    // Clear storage after navigating
+    setTimeout(() => {
+      localStorage.removeItem('editorGrid');
+      localStorage.removeItem('editorSettings');
+      localStorage.removeItem('editorLevelName');
+    }, 100);
   }
 
   private async getLevelConfig(): Promise<import('../logic/LevelManager').LevelConfig | null> {
