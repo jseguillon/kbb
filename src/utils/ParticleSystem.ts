@@ -7,6 +7,7 @@ export class Particle {
   maxLife: number;
   color: string;
   size: number;
+  active: boolean = true;
 
   constructor(x: number, y: number, color: string, size: number) {
     this.x = x;
@@ -26,62 +27,56 @@ export class Particle {
     this.x += this.vx;
     this.y += this.vy;
     this.life--;
+    if (this.life <= 0) {
+      this.active = false;
+    }
   }
 
   draw(ctx: CanvasRenderingContext2D): void {
-    const opacity = this.life / this.maxLife;
-    if (opacity <= 0) return;
+    if (!this.active) return;
     
-    ctx.fillStyle = this.color;
+    const opacity = this.life / this.maxLife;
     ctx.globalAlpha = opacity;
+    ctx.fillStyle = this.color;
     ctx.beginPath();
     ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
     ctx.fill();
-  }
-
-  isDead(): boolean {
-    return this.life <= 0;
+    ctx.globalAlpha = 1.0;
   }
 }
 
 export class ParticleSystem {
   private particles: Particle[] = [];
   private maxParticles: number = 50;
-  private colors: string[] = [];
 
   spawn(x: number, y: number, color: string, count: number): void {
-    for (let i = 0; i < count; i++) {
-      if (this.particles.length < this.maxParticles) {
-        const size = 2 + Math.random() * 3;
-        this.colors.push(color);
-        this.particles.push(new Particle(x, y, color, size));
-      }
+    // Remove inactive particles first to make room
+    const activeParticles = this.particles.filter(p => p.active);
+    this.particles = activeParticles;
+    
+    const spaceAvailable = this.maxParticles - this.particles.length;
+    const toSpawn = Math.min(count, spaceAvailable);
+    
+    for (let i = 0; i < toSpawn; i++) {
+      const size = 2 + Math.random() * 3;
+      this.particles.push(new Particle(x, y, color, size));
     }
   }
 
   update(): void {
-    // Remove dead particles without creating new array
-    let writeIndex = 0;
-    for (let i = 0; i < this.particles.length; i++) {
-      const p = this.particles[i];
+    // Only update and draw active particles
+    this.particles = this.particles.filter(p => {
+      if (!p.active) return false;
       p.update();
-      if (!p.isDead()) {
-        this.particles[writeIndex++] = p;
-      }
-    }
-    this.particles.length = writeIndex;
+      return p.active;
+    });
   }
 
   draw(ctx: CanvasRenderingContext2D): void {
-    if (this.particles.length === 0) return;
-    
-    ctx.save();
     this.particles.forEach(p => p.draw(ctx));
-    ctx.restore();
   }
 
   clear(): void {
     this.particles = [];
-    this.colors = [];
   }
 }
