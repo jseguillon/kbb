@@ -117,6 +117,17 @@ export class LevelEditor {
                 <label>Life Power-up: <span id="life-prob-value">0.10</span></label>
                 <input type="range" id="life-prob" min="0" max="1" step="0.05" value="0.10">
               </div>
+              
+              <div class="probability-sum invalid">
+                <div class="probability-sum-text">Total Probability:</div>
+                <div class="probability-sum-value invalid">0.00 ✗</div>
+              </div>
+              
+              <div class="error-message visible">
+                <strong>⚠️ Invalid Probability Sum</strong>
+                The sum of all power-up probabilities must equal 1.0 (100%). 
+                Currently: 0.00
+              </div>
             </div>
           </div>
           
@@ -231,6 +242,11 @@ export class LevelEditor {
       
       // Control buttons
       if (target.classList.contains('btn-save')) {
+        if (!this.validateProbabilities()) {
+          alert('Cannot save: Power-up probabilities must sum to 1.0 (100%). Please fix the settings first.');
+          return;
+        }
+        
         const index = this.editorManager.getCustomLevelsCount();
         this.editorManager.saveLevel(index);
         alert('Level saved!');
@@ -347,12 +363,64 @@ export class LevelEditor {
       { slider: this.container.querySelector('#life-prob')!, display: this.container.querySelector('#life-prob-value')! },
     ];
     
+    const updateProbabilitySum = (): void => {
+      const probabilities = probSliders.map(({ slider }) => parseFloat(slider.value));
+      const sum = probabilities.reduce((acc, val) => acc + val, 0);
+      const isValid = Math.abs(sum - 1.0) < 0.001;
+      
+      const sumContainer = this.container.querySelector('.probability-sum');
+      const sumValue = this.container.querySelector('.probability-sum-value');
+      const errorMessage = this.container.querySelector('.error-message');
+      
+      if (sumContainer && sumValue) {
+        if (isValid) {
+          sumContainer.classList.remove('invalid');
+          sumContainer.classList.add('valid');
+          sumValue.classList.remove('invalid');
+          sumValue.classList.add('valid');
+          sumValue.textContent = `${sum.toFixed(2)} ✓`;
+          if (errorMessage) {
+            const errorTitle = errorMessage.querySelector('strong');
+            if (errorTitle) errorTitle.textContent = '✓ Valid Probability Sum';
+            errorMessage.classList.remove('visible');
+          }
+        } else {
+          sumContainer.classList.remove('valid');
+          sumContainer.classList.add('invalid');
+          sumValue.classList.remove('valid');
+          sumValue.classList.add('invalid');
+          sumValue.textContent = `${sum.toFixed(2)} ✗`;
+          if (errorMessage) {
+            const errorTitle = errorMessage.querySelector('strong');
+            if (errorTitle) {
+              errorTitle.textContent = `⚠️ Invalid Probability Sum (Total: ${sum.toFixed(2)})`;
+            }
+            errorMessage.classList.add('visible');
+          }
+        }
+      }
+      
+      // Update probability value colors
+      probSliders.forEach(({ display }) => {
+        if (display) {
+          display.classList.remove('error');
+          if (!isValid) {
+            display.classList.add('error');
+          }
+        }
+      });
+    };
+    
     probSliders.forEach(({ slider, display }) => {
       slider.addEventListener('input', (e) => {
         const value = parseFloat((e.target as HTMLInputElement).value);
         display.textContent = value.toFixed(2);
+        updateProbabilitySum();
       });
     });
+    
+    // Initial validation
+    updateProbabilitySum();
   }
 
   private drawCanvas(ctx: CanvasRenderingContext2D): void {
@@ -540,6 +608,11 @@ export class LevelEditor {
   }
 
   private downloadLevel(): void {
+    if (!this.validateProbabilities()) {
+      alert('Cannot download: Power-up probabilities must sum to 1.0 (100%). Please fix the settings first.');
+      return;
+    }
+    
     const settings = this.editorManager.getSettingsFromUI();
     const levelName = this.editorManager.getLevelName() || 'level';
     const levelData: EditorLevel = {
@@ -626,7 +699,39 @@ export class LevelEditor {
     return this.container;
   }
   
+  private validateProbabilities(): boolean {
+    const probSliders = [
+      this.container.querySelector('#wide-prob') as HTMLInputElement,
+      this.container.querySelector('#multi-prob') as HTMLInputElement,
+      this.container.querySelector('#laser-prob') as HTMLInputElement,
+      this.container.querySelector('#slow-prob') as HTMLInputElement,
+      this.container.querySelector('#life-prob') as HTMLInputElement,
+    ];
+    
+    const probabilities = probSliders.map(slider => parseFloat(slider.value));
+    const sum = probabilities.reduce((acc, val) => acc + val, 0);
+    const isValid = Math.abs(sum - 1.0) < 0.001;
+    
+    if (!isValid) {
+      const errorMessage = this.container.querySelector('.error-message');
+      if (errorMessage) {
+        const errorTitle = errorMessage.querySelector('strong');
+        if (errorTitle) {
+          errorTitle.textContent = `⚠️ Invalid Probability Sum (Total: ${sum.toFixed(2)})`;
+        }
+        errorMessage.classList.add('visible');
+      }
+    }
+    
+    return isValid;
+  }
+  
   private async playLevel(): Promise<void> {
+    if (!this.validateProbabilities()) {
+      alert('Cannot play: Power-up probabilities must sum to 1.0 (100%). Please fix the settings first.');
+      return;
+    }
+    
     const config = await this.getLevelConfig();
     if (!config) {
       alert('Please save a level first before playing');

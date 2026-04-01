@@ -294,3 +294,83 @@
   cursor: pointer;
   border: none;
 }
+
+.probability-values {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 5px;
+  font-size: 13px;
+}
+
+.probability-values span {
+  min-width: 50px;
+  text-align: right;
+  padding-left: 8px;
+}
+
+.probability-values .prob-value {
+  color: #00ccff;
+}
+
+.probability-values .prob-value.error {
+  color: #ff4444;
+  font-weight: bold;
+}
+
+.probability-sum {
+  margin-top: 15px;
+  padding: 10px;
+  background: #2a2a3e;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.probability-sum.valid {
+  border-left: 4px solid #00ccff;
+}
+
+.probability-sum.invalid {
+  border-left: 4px solid #ff4444;
+  background: #3a1a1a;
+}
+
+.probability-sum-text {
+  font-size: 14px;
+  color: #ccc;
+}
+
+.probability-sum-value {
+  font-size: 18px;
+  font-weight: bold;
+  margin-top: 5px;
+}
+
+.probability-sum-value.valid {
+  color: #00ccff;
+}
+
+.probability-sum-value.invalid {
+  color: #ff4444;
+}
+
+.error-message {
+  margin-top: 15px;
+  padding: 12px;
+  background: #3a1a1a;
+  border: 1px solid #ff4444;
+  border-radius: 4px;
+  color: #ff6666;
+  font-size: 14px;
+  display: none;
+}
+
+.error-message.visible {
+  display: block;
+}
+
+.error-message strong {
+  display: block;
+  margin-bottom: 5px;
+  color: #ff4444;
+}
