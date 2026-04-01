@@ -62,6 +62,10 @@ export class Game {
   private shakeDecay: number = 0.85;
   private particleSystem: ParticleSystem = new ParticleSystem();
   private scorePopupManager: ScorePopupManager = new ScorePopupManager();
+  private fps: number = 0;
+  private fpsTimer: number = 0;
+  private frameCount: number = 0;
+  private lastTime: number = 0;
 
   private isRedBrick(color: string): boolean {
     const redColors = ['#ff0044', '#ff3300', '#ff0000', '#ff4400'];
@@ -198,6 +202,20 @@ constructor(canvas: HTMLCanvasElement, levelManager?: LevelManager) {
         this.loadLevel(this.levelManager!.getCurrentLevel() - 1);
         this.balls = [new Ball(this.paddle.x + this.paddle.width / 2, this.paddle.y - 10, 8, true)];
         this.scoreManager.addScore(500);
+        e.preventDefault();
+      } else if (e.key.toLowerCase() === 'f') {
+        // Force destroy all bricks for testing
+        this.brickManager.brickList.forEach(brick => {
+          if (brick.health > 0) {
+            brick.health = 0;
+            brick.startDestroy();
+            const particleCount = this.isRedBrick(brick.color) ? 12 : 8;
+            this.triggerShake(this.isRedBrick(brick.color) ? 4 : 2);
+            this.particleSystem.spawn(brick.x + brick.width / 2, brick.y + brick.height / 2, brick.color, particleCount);
+            this.scorePopupManager.spawn(brick.x + brick.width / 2, brick.y, 10, brick.color);
+          }
+        });
+        console.log('DEBUG: All bricks destroyed', { particleCount: this.particleSystem['particles'].length });
         e.preventDefault();
       }
     } else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
@@ -385,6 +403,18 @@ constructor(canvas: HTMLCanvasElement, levelManager?: LevelManager) {
 
   private update(_deltaTime: number) {
     if (this.gameState.state !== GameState.GameStateState.PLAYING) return;
+
+    const now = performance.now();
+    if (this.lastTime > 0) {
+      this.frameCount++;
+      if (now - this.fpsTimer >= 1000) {
+        this.fps = Math.round((this.frameCount * 1000) / (now - this.fpsTimer));
+        this.frameCount = 0;
+        this.fpsTimer = now;
+        console.log(`FPS: ${this.fps}, Particles: ${this.particleSystem['particles'].length}, Popups: ${this.scorePopupManager['popups'].length}`);
+      }
+    }
+    this.lastTime = now;
 
     this.paddle.update(this.canvas.width, this.gameSpeed);
     this.powerUpManager.update(this.gameSpeed);

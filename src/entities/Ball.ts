@@ -99,18 +99,22 @@ export class Ball {
   }
 
   draw(ctx: CanvasRenderingContext2D) {
-    for (let i = 0; i < this.trail.length; i++) {
-      const point = this.trail[i];
-      const opacity = point.opacity * (i / this.trail.length);
-      const size = this.radius * (0.5 + 0.5 * (i / this.trail.length));
-      
-      ctx.beginPath();
-      ctx.arc(point.x, point.y, size, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(255, 68, 68, ${opacity})`;
-      ctx.fill();
-      ctx.closePath();
+    // Draw trail more efficiently
+    if (this.trail.length > 1) {
+      for (let i = 0; i < this.trail.length; i++) {
+        const point = this.trail[i];
+        const opacity = point.opacity * (i / this.trail.length);
+        const size = this.radius * (0.5 + 0.5 * (i / this.trail.length));
+        
+        ctx.globalAlpha = Math.max(0.1, opacity);
+        ctx.beginPath();
+        ctx.arc(point.x, point.y, size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1.0;
     }
     
+    // Draw main ball
     ctx.beginPath();
     ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
     ctx.fillStyle = '#ff4444';
