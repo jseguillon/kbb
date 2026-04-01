@@ -598,7 +598,7 @@ export class LevelEditor {
     }
     
     const encoded = btoa(JSON.stringify(config));
-    window.location.href = `/?customLevel=${encoded}`;
+    window.location.href = `./?customLevel=${encoded}`;
   }
 
   private async getLevelConfig(): Promise<import('../logic/LevelManager').LevelConfig | null> {
