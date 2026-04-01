@@ -3,10 +3,10 @@ import { Game } from './engine/Game';
 import { LevelEditor } from './components/LevelEditor';
 import { LevelManager } from './logic/LevelManager';
 
-const path = window.location.pathname;
 const urlParams = new URLSearchParams(window.location.search);
+const isEditor = urlParams.get('editor') === 'true';
 
-if (path === '/editor') {
+if (isEditor) {
   // Show level editor
   const editor = new LevelEditor();
   document.body.appendChild(editor.getContainer());
