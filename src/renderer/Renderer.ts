@@ -8,12 +8,31 @@ export class Renderer {
   totalLevels: number = 5;
   private status: any = null;
   private stars: Array<{x: number, y: number, size: number, speed: number, opacity: number}> = [];
+  private fps: number = 0;
+  private showFps: boolean = false;
 
   constructor(ctx: CanvasRenderingContext2D, width: number, height: number) {
     this.ctx = ctx;
     this.width = width;
     this.height = height;
     this.stars = this.generateStars(60);
+  }
+
+  setFps(fps: number): void {
+    this.fps = fps;
+  }
+
+  toggleFpsDisplay(): void {
+    this.showFps = !this.showFps;
+  }
+
+  drawFpsDisplay(): void {
+    if (!this.showFps) return;
+    
+    this.ctx.fillStyle = '#00ff00';
+    this.ctx.font = 'bold 14px monospace';
+    this.ctx.textAlign = 'left';
+    this.ctx.fillText(`FPS: ${this.fps}`, 10, 20);
   }
 
   setStatus(status: any) {

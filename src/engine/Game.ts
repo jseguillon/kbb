@@ -44,7 +44,6 @@ export class Game {
   private lasers: Laser[] = [];
   private lastLaserTime: number = 0;
   private laserCooldown: number = 400;
-  private debugMode: boolean = false;
   private gameSpeed: number = 0.5;
   private speedDisplayTimer: number = 0;
   private speedDisplayValue: string = '';
@@ -62,10 +61,14 @@ export class Game {
   private shakeDecay: number = 0.85;
   private particleSystem: ParticleSystem = new ParticleSystem();
   private scorePopupManager: ScorePopupManager = new ScorePopupManager();
-  private fps: number = 0;
-  private fpsTimer: number = 0;
+  
+  // Performance monitoring
   private frameCount: number = 0;
-  private lastTime: number = 0;
+  private lastFpsUpdate: number = 0;
+  private currentFps: number = 0;
+  private performanceLog: string[] = [];
+  private maxPerformanceLog: number = 50;
+  private debugMode: boolean = false;
 
   private isRedBrick(color: string): boolean {
     const redColors = ['#ff0044', '#ff3300', '#ff0000', '#ff4400'];
@@ -74,6 +77,42 @@ export class Game {
 
   triggerShake(intensity: number): void {
     this.shakeAmount = intensity;
+  }
+
+  private updatePerformanceMetrics(_deltaTime: number): void {
+    this.frameCount++;
+    const now = Date.now();
+    
+    if (now - this.lastFpsUpdate >= 1000) {
+      this.currentFps = Math.round(this.frameCount * 1000 / (now - this.lastFpsUpdate));
+      this.frameCount = 0;
+      this.lastFpsUpdate = now;
+      
+      // Log performance every 5 seconds
+      if (now % 5000 < 1000) {
+        this.logPerformance(`FPS: ${this.currentFps}, Particles: ${this.particleSystem['particles'].length}, Balls: ${this.balls.length}, PowerUps: ${this.powerUpManager['powerUps'].length}`);
+      }
+    }
+  }
+
+  private logPerformance(message: string): void {
+    const timestamp = new Date().toLocaleTimeString();
+    const logEntry = `[${timestamp}] ${message}`;
+    this.performanceLog.push(logEntry);
+    
+    if (this.performanceLog.length > this.maxPerformanceLog) {
+      this.performanceLog.shift();
+    }
+    
+    console.log(logEntry);
+  }
+
+  getPerformanceLog(): string[] {
+    return [...this.performanceLog];
+  }
+
+  getFps(): number {
+    return this.currentFps;
   }
 
   get canvasHeight(): number {
@@ -99,7 +138,7 @@ constructor(canvas: HTMLCanvasElement, levelManager?: LevelManager) {
     this.brickManager = new BrickManager(canvas.width, undefined, this.isMobile);
  this.powerUpManager = new PowerUpManager(canvas.width, canvas.height, this);
 
- this.gameLoop = new GameLoop(this.update.bind(this), this.draw.bind(this));
+ this.gameLoop = new GameLoop((deltaTime) => this.updateGame(deltaTime), this.draw.bind(this));
 
  this.inputHandler.addEventListener('keydown', ((e: Event) => this.handleKeydown(e as KeyboardEvent)) as EventListener);
     this.inputHandler.addEventListener('keyup', ((e: Event) => this.handleKeyup(e as KeyboardEvent)) as EventListener);
@@ -203,19 +242,11 @@ constructor(canvas: HTMLCanvasElement, levelManager?: LevelManager) {
         this.balls = [new Ball(this.paddle.x + this.paddle.width / 2, this.paddle.y - 10, 8, true)];
         this.scoreManager.addScore(500);
         e.preventDefault();
-      } else if (e.key.toLowerCase() === 'f') {
-        // Force destroy all bricks for testing
-        this.brickManager.brickList.forEach(brick => {
-          if (brick.health > 0) {
-            brick.health = 0;
-            brick.startDestroy();
-            const particleCount = this.isRedBrick(brick.color) ? 12 : 8;
-            this.triggerShake(this.isRedBrick(brick.color) ? 4 : 2);
-            this.particleSystem.spawn(brick.x + brick.width / 2, brick.y + brick.height / 2, brick.color, particleCount);
-            this.scorePopupManager.spawn(brick.x + brick.width / 2, brick.y, 10, brick.color);
-          }
-        });
-        console.log('DEBUG: All bricks destroyed', { particleCount: this.particleSystem['particles'].length });
+      } else if (e.key === '`' || e.key === '~') {
+        this.renderer.toggleFpsDisplay();
+        e.preventDefault();
+      } else if (e.key === 'F12') {
+        this.triggerAllBrickDestruction();
         e.preventDefault();
       }
     } else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
@@ -404,18 +435,6 @@ constructor(canvas: HTMLCanvasElement, levelManager?: LevelManager) {
   private update(_deltaTime: number) {
     if (this.gameState.state !== GameState.GameStateState.PLAYING) return;
 
-    const now = performance.now();
-    if (this.lastTime > 0) {
-      this.frameCount++;
-      if (now - this.fpsTimer >= 1000) {
-        this.fps = Math.round((this.frameCount * 1000) / (now - this.fpsTimer));
-        this.frameCount = 0;
-        this.fpsTimer = now;
-        console.log(`FPS: ${this.fps}, Particles: ${this.particleSystem['particles'].length}, Popups: ${this.scorePopupManager['popups'].length}`);
-      }
-    }
-    this.lastTime = now;
-
     this.paddle.update(this.canvas.width, this.gameSpeed);
     this.powerUpManager.update(this.gameSpeed);
     const collectedPowerUp = this.powerUpManager.checkPaddleCollision(this.paddle);
@@ -435,6 +454,15 @@ constructor(canvas: HTMLCanvasElement, levelManager?: LevelManager) {
 
     this.renderer.setScore(this.scoreManager.getScore());
     this.renderer.setLives(this.scoreManager.getLives());
+  }
+
+  updateGame(deltaTime: number) {
+    if (this.gameState.state !== GameState.GameStateState.PLAYING && 
+        this.gameState.state !== GameState.GameStateState.MENU) return;
+
+    this.update(deltaTime);
+    this.updatePerformanceMetrics(deltaTime);
+    this.renderer.setFps(this.gameLoop.getFps());
   }
 
   private updateBalls() {
@@ -611,6 +639,7 @@ constructor(canvas: HTMLCanvasElement, levelManager?: LevelManager) {
     }
     
     this.renderer.clear();
+    this.renderer.drawFpsDisplay();
     this.renderer.ctx.save();
     this.renderer.ctx.translate(shakeX, shakeY);
 
@@ -732,6 +761,16 @@ constructor(canvas: HTMLCanvasElement, levelManager?: LevelManager) {
       this.renderer.ctx.textAlign = 'center';
       this.renderer.ctx.fillText(this.speedDisplayValue, this.renderer.width / 2, 60);
     }
+  }
+
+  private triggerAllBrickDestruction(): void {
+    this.brickManager.brickList.forEach(brick => {
+      brick.startDestroy();
+      const particleCount = this.isRedBrick(brick.color) ? 12 : 8;
+      this.triggerShake(this.isRedBrick(brick.color) ? 4 : 2);
+      this.particleSystem.spawn(brick.x + brick.width / 2, brick.y + brick.height / 2, brick.color, particleCount);
+    });
+    this.scorePopupManager.spawn(this.canvas.width / 2, 100, this.brickManager.brickList.length * 10, '#ffffff');
   }
 
   private drawKilledPodDisplay(): void {
