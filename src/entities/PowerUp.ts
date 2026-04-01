@@ -11,6 +11,9 @@ export class PowerUp {
   color: string;
   label: string;
   isDebug: boolean;
+  private pulsePhase: number = 0;
+  private pulseSpeed: number = 0.1;
+  private rotation: number = 0;
 
   constructor(x: number, y: number, type: PowerUpType, isDebug: boolean = false) {
     this.x = x;
@@ -48,14 +51,25 @@ export class PowerUp {
 
   update(gameSpeed: number = 1.0) {
     this.y += this.dy * gameSpeed;
+    this.pulsePhase += this.pulseSpeed;
+    this.rotation += 3;
   }
 
   draw(ctx: CanvasRenderingContext2D) {
     if (!this.active) return;
 
+    const pulse = 1 + Math.sin(this.pulsePhase) * 0.08;
+    const glow = 8 + Math.sin(this.pulsePhase) * 4;
+
+    ctx.save();
+    ctx.translate(this.x + this.width / 2, this.y + this.height / 2);
+    ctx.scale(pulse, pulse);
+    ctx.rotate((this.rotation * Math.PI) / 180);
+    ctx.translate(-(this.x + this.width / 2), -(this.y + this.height / 2));
+
     ctx.fillStyle = this.color;
     ctx.shadowColor = this.color;
-    ctx.shadowBlur = 8;
+    ctx.shadowBlur = glow;
 
     ctx.beginPath();
     ctx.roundRect(this.x, this.y, this.width, this.height, 4);
@@ -66,5 +80,7 @@ export class PowerUp {
     ctx.font = 'bold 18px Arial';
     ctx.textAlign = 'center';
     ctx.fillText(this.label, this.x + this.width / 2, this.y + 17);
+
+    ctx.restore();
   }
 }

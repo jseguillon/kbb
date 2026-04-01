@@ -1,0 +1,22 @@
+{
+  "metadata": {
+    "name": "Level 1 - Wide Paddle Only",
+    "description": "Test level with wide paddle power-up only (40% chance)"
+  },
+  "settings": {
+    "gameSpeed": 0.8,
+    "laserCooldown": 400,
+    "powerUpSpawnRate": 5,
+    "powerUpProbabilities": {
+      "wide": 0.4,
+      "multi": 0,
+      "laser": 0,
+      "slow": 0,
+      "life": 0
+    }
+  },
+  "grid": [
+    ["#ff0044", "#ff0044", "#ff0044", "#ff0044", "#ff0044", "#ff0044", "#ff0044", "#ff0044", "#ff0044", "#ff0044", "#ff0044", "#ff0044", "#ff0044", "#ff0044", "#ff0044", "#ff0044", "#ff0044", "#ff0044", "#ff0044", "#ff0044", "#ff0044", "#ff0044", "#ff0044", "#ff0044"],
+    ["#ff0044", "#ff0044", "#ff0044", "#ff0044", "#ff0044", "#ff0044", "#ff0044", "#ff0044", "#ff0044", "#ff0044", "#ff0044", "#ff0044", "#ff0044", "#ff0044", "#ff0044", "#ff0044", "#ff0044", "#ff0044", "#ff0044", "#ff0044", "#ff0044", "#ff0044", "#ff0044", "#ff0044"]
+  ]
+}

@@ -106,8 +106,9 @@ export class PowerUpManager {
     this.powerUps.forEach(powerUp => powerUp.draw(ctx));
   }
 
-  checkPaddleCollision(paddle: Paddle): void {
-    this.powerUps.forEach(powerUp => {
+  checkPaddleCollision(paddle: Paddle): PowerUp | null {
+    for (let i = 0; i < this.powerUps.length; i++) {
+      const powerUp = this.powerUps[i];
       if (
         powerUp.active &&
         powerUp.x < paddle.x + paddle.width &&
@@ -117,8 +118,10 @@ export class PowerUpManager {
       ) {
         powerUp.active = false;
         this.activatePowerUp(powerUp.type, paddle);
+        return powerUp;
       }
-    });
+    }
+    return null;
   }
 
   private activatePowerUp(_type: PowerUpType, _paddle: Paddle): void {

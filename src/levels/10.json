@@ -1,0 +1,22 @@
+{
+  "metadata": {
+    "name": "Level 8 - Balanced",
+    "description": "Balanced level with moderate settings - power-ups spawn every 5 bricks"
+  },
+  "settings": {
+    "gameSpeed": 0.9,
+    "laserCooldown": 400,
+    "powerUpSpawnRate": 5,
+    "powerUpProbabilities": {
+      "wide": 0.25,
+      "multi": 0.2,
+      "laser": 0.2,
+      "slow": 0.2,
+      "life": 0.1
+    }
+  },
+  "grid": [
+    ["#ff00ff", "#ff00ff", "#ff00ff", "#ff00ff", "#ff00ff", "#ff00ff", "#ff00ff", "#ff00ff", "#ff00ff", "#ff00ff", "#ff00ff", "#ff00ff", "#ff00ff", "#ff00ff", "#ff00ff", "#ff00ff", "#ff00ff", "#ff00ff", "#ff00ff", "#ff00ff", "#ff00ff", "#ff00ff", "#ff00ff", "#ff00ff"],
+    ["#ff00ff", "#ff00ff", "#ff00ff", "#ff00ff", "#ff00ff", "#ff00ff", "#ff00ff", "#ff00ff", "#ff00ff", "#ff00ff", "#ff00ff", "#ff00ff", "#ff00ff", "#ff00ff", "#ff00ff", "#ff00ff", "#ff00ff", "#ff00ff", "#ff00ff", "#ff00ff", "#ff00ff", "#ff00ff", "#ff00ff", "#ff00ff"]
+  ]
+}

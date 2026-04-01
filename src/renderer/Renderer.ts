@@ -7,11 +7,13 @@ export class Renderer {
   level: number = 1;
   totalLevels: number = 5;
   private status: any = null;
+  private stars: Array<{x: number, y: number, size: number, speed: number, opacity: number}> = [];
 
   constructor(ctx: CanvasRenderingContext2D, width: number, height: number) {
     this.ctx = ctx;
     this.width = width;
     this.height = height;
+    this.stars = this.generateStars(60);
   }
 
   setStatus(status: any) {
@@ -25,11 +27,74 @@ export class Renderer {
   setDimensions(width: number, height: number) {
     this.width = width;
     this.height = height;
+    this.stars = this.generateStars(60);
+  }
+
+  private generateStars(count: number): Array<{x: number, y: number, size: number, speed: number, opacity: number}> {
+    const stars: Array<{x: number, y: number, size: number, speed: number, opacity: number}> = [];
+    for (let i = 0; i < count; i++) {
+      stars.push({
+        x: Math.random() * this.width,
+        y: Math.random() * this.height,
+        size: 0.5 + Math.random() * 1.5,
+        speed: 0.2 + Math.random() * 0.5,
+        opacity: 0.3 + Math.random() * 0.7
+      });
+    }
+    return stars;
+  }
+
+  private updateStars(): void {
+    this.stars.forEach(star => {
+      star.y += star.speed;
+      if (star.y > this.height) {
+        star.y = 0;
+        star.x = Math.random() * this.width;
+      }
+    });
   }
 
   clear() {
-    this.ctx.fillStyle = '#1a1a2e';
+    // Radial gradient background
+    const gradient = this.ctx.createRadialGradient(
+      this.width / 2, this.height / 2, 0,
+      this.width / 2, this.height / 2, Math.max(this.width, this.height)
+    );
+    gradient.addColorStop(0, '#2a2a4e');
+    gradient.addColorStop(1, '#1a1a2e');
+    
+    this.ctx.fillStyle = gradient;
     this.ctx.fillRect(0, 0, this.width, this.height);
+    
+    // Draw stars
+    this.updateStars();
+    this.ctx.fillStyle = '#ffffff';
+    this.stars.forEach(star => {
+      this.ctx.globalAlpha = star.opacity;
+      this.ctx.beginPath();
+      this.ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+      this.ctx.fill();
+    });
+    this.ctx.globalAlpha = 1.0;
+    
+    // Subtle grid overlay
+    this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.01)';
+    this.ctx.lineWidth = 1;
+    const gridSize = 40;
+    
+    for (let x = 0; x <= this.width; x += gridSize) {
+      this.ctx.beginPath();
+      this.ctx.moveTo(x, 0);
+      this.ctx.lineTo(x, this.height);
+      this.ctx.stroke();
+    }
+    
+    for (let y = 0; y <= this.height; y += gridSize) {
+      this.ctx.beginPath();
+      this.ctx.moveTo(0, y);
+      this.ctx.lineTo(this.width, y);
+      this.ctx.stroke();
+    }
   }
 
   drawHUD() {

@@ -12,6 +12,7 @@ export class Ball {
   launched: boolean;
   isMain: boolean;
   active: boolean;
+  private trail: Array<{x: number, y: number, opacity: number}> = [];
 
   constructor(x: number, y: number, radius: number, isMain: boolean = true) {
     this.x = x;
@@ -43,6 +44,11 @@ export class Ball {
       this.x = game.paddle.x + game.paddle.width / 2;
       this.y = game.paddle.y - this.radius - 2;
       return;
+    }
+
+    this.trail.push({x: this.x, y: this.y, opacity: 0.6});
+    if (this.trail.length > 15) {
+      this.trail.shift();
     }
 
     this.x += this.dx * speedMultiplier;
@@ -93,6 +99,18 @@ export class Ball {
   }
 
   draw(ctx: CanvasRenderingContext2D) {
+    for (let i = 0; i < this.trail.length; i++) {
+      const point = this.trail[i];
+      const opacity = point.opacity * (i / this.trail.length);
+      const size = this.radius * (0.5 + 0.5 * (i / this.trail.length));
+      
+      ctx.beginPath();
+      ctx.arc(point.x, point.y, size, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255, 68, 68, ${opacity})`;
+      ctx.fill();
+      ctx.closePath();
+    }
+    
     ctx.beginPath();
     ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
     ctx.fillStyle = '#ff4444';
