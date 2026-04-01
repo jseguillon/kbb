@@ -611,10 +611,13 @@ export class LevelEditor {
     
     try {
       const levelLoader = new LevelLoader();
+      const settings = this.editorManager.getSettingsFromUI();
+      
       const config = levelLoader.parseLevelToConfig({
         name: levelName,
         grid,
         colors: levelLoader['extractColors'](grid),
+        settings,
       });
       return config;
     } catch (error) {
