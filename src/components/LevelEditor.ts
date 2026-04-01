@@ -597,11 +597,7 @@ export class LevelEditor {
       return;
     }
     
-    console.log('=== Level Config being encoded ===');
-    console.log(JSON.stringify(config, null, 2));
     const encoded = btoa(JSON.stringify(config));
-    console.log('Encoded:', encoded.substring(0, 100) + '...');
-    console.log('=== End Config ===');
     window.location.href = `/?customLevel=${encoded}`;
   }
 
