@@ -123,11 +123,10 @@ export class LevelEditor {
                 <div class="probability-sum-value invalid">0.00 ✗</div>
               </div>
               
-              <div class="error-message visible">
-                <strong>⚠️ Invalid Probability Sum</strong>
-                The sum of all power-up probabilities must equal 1.0 (100%). 
-                Currently: 0.00
-              </div>
+<div class="error-message visible">
+<strong>⚠️ Invalid Probability Sum</strong>
+The sum of all power-up probabilities must equal 1.0 (100%).
+</div>
             </div>
           </div>
           
