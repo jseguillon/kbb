@@ -1,3 +1,5 @@
+import { HighScoreManager } from '../utils/HighScoreManager';
+
 export class Renderer {
   ctx: CanvasRenderingContext2D;
   width: number;
@@ -209,11 +211,33 @@ export class Renderer {
     this.ctx.fillStyle = '#ff4444';
     this.ctx.font = 'bold 48px Arial';
     this.ctx.textAlign = 'center';
-    this.ctx.fillText('GAME OVER', this.width / 2, this.height / 2 - 20);
+    this.ctx.fillText('GAME OVER', this.width / 2, this.height / 2 - 60);
 
     this.ctx.fillStyle = '#ffffff';
+    this.ctx.font = '28px Arial';
+    this.ctx.fillText(`Final Score: ${HighScoreManager.formatScore(this.score)}`, this.width / 2, this.height / 2 - 20);
+
+    const topScores = this.getTopHighScores();
+    if (topScores.length > 0) {
+      this.ctx.font = 'bold 20px Arial';
+      this.ctx.fillText('Top Scores:', this.width / 2, this.height / 2 + 20);
+      
+      topScores.forEach((highScore, index) => {
+        this.ctx.font = '18px Arial';
+        this.ctx.fillText(`#${index + 1} ${highScore.name}: ${HighScoreManager.formatScore(highScore.score)}`, this.width / 2, this.height / 2 + 50 + index * 25);
+      });
+    }
+
     this.ctx.font = '24px Arial';
-    this.ctx.fillText('Press SPACE or CLICK to restart', this.width / 2, this.height / 2 + 30);
+    this.ctx.fillText('Press SPACE or CLICK to restart', this.width / 2, this.height / 2 + 180);
+  }
+
+  private getTopHighScores(): any[] {
+    try {
+      return HighScoreManager.getTopScores();
+    } catch {
+      return [];
+    }
   }
 
   drawLevelComplete() {
@@ -240,14 +264,25 @@ export class Renderer {
     this.ctx.fillStyle = '#00ff88';
     this.ctx.font = 'bold 48px Arial';
     this.ctx.textAlign = 'center';
-    this.ctx.fillText('YOU WIN!', this.width / 2, this.height / 2 - 20);
+    this.ctx.fillText('YOU WIN!', this.width / 2, this.height / 2 - 80);
 
     this.ctx.fillStyle = '#ffffff';
     this.ctx.font = '28px Arial';
-    this.ctx.fillText(`Final Score: ${this.score}`, this.width / 2, this.height / 2 + 10);
+    this.ctx.fillText(`Final Score: ${HighScoreManager.formatScore(this.score)}`, this.width / 2, this.height / 2 - 40);
+
+    const topScores = this.getTopHighScores();
+    if (topScores.length > 0) {
+      this.ctx.font = 'bold 20px Arial';
+      this.ctx.fillText('Top Scores:', this.width / 2, this.height / 2 + 10);
+      
+      topScores.forEach((highScore, index) => {
+        this.ctx.font = '18px Arial';
+        this.ctx.fillText(`#${index + 1} ${highScore.name}: ${HighScoreManager.formatScore(highScore.score)}`, this.width / 2, this.height / 2 + 40 + index * 25);
+      });
+    }
 
     this.ctx.font = '24px Arial';
-    this.ctx.fillText('Press SPACE or CLICK to play again', this.width / 2, this.height / 2 + 50);
+    this.ctx.fillText('Press SPACE or CLICK to play again', this.width / 2, this.height / 2 + 220);
   }
 
   drawMenu(game: any) {
