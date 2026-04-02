@@ -269,6 +269,12 @@ const { row, col } = getGridFromEvent(_e);
       isMouseDown = false;
     });
     
+    // Update cursor position on hover (not just click)
+    canvas.addEventListener('mouseover', (e: MouseEvent) => {
+      const { row, col } = getGridFromEvent(e);
+      updateCursorPosition(row, col);
+    });
+    
     // Right click - delete brick
     canvas.addEventListener('contextmenu', (e: MouseEvent) => {
       e.preventDefault();
