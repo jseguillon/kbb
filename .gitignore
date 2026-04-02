@@ -22,3 +22,27 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Logs and output
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Test results
+test-results/
+
+# Screenshots and images (generated)
+*.png
+!public/*.png
+!src/assets/*.png
+menu_levels.png
+menu_screenshot.png
+page-home.png
+screenshot-home.png
+
+# Playwright MCP
+.playwright-mcp/

@@ -40,7 +40,7 @@ export class Brick {
     
     try {
       const assetLoader = AssetLoader.getInstance();
-      this.crackImage = await assetLoader.loadSVG('./src/assets/crack.svg');
+      this.crackImage = await assetLoader.loadSVG('./assets/crack.svg');
       this.crackLoaded = true;
     } catch (error) {
       console.error('Failed to load crack SVG:', error);

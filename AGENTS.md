@@ -2,13 +2,14 @@
 
 ## Project Overview
 
-KBB is a TypeScript/Vite brick breaker game with power-up system, E2E testing, and modern architecture.
+KBB is a TypeScript/Vite brick breaker game with power-up system, E2E testing, visual polish effects, and modern architecture.
 
 ## Tech Stack
 
 - **Vite** 8.0.0 - Build tool and dev server
 - **TypeScript** - Type-safe development
 - **Playwright** - E2E testing
+- **Vitest** - Unit testing
 - **Canvas API** - 2D rendering
 - **Node.js** - Runtime (LTS recommended)
 
@@ -27,6 +28,7 @@ npm run build
 
 # Test
 npm run test:e2e
+npm run test:unit
 ```
 
 ## Codebase Structure
@@ -35,35 +37,55 @@ npm run test:e2e
 src/
 ├── engine/
 │   ├── Game.ts              # Main game class - orchestrates all systems
-│   ├── GameLoop.ts          # RequestAnimationFrame loop
+│   ├── GameLoop.ts          # RequestAnimationFrame loop with FPS tracking
 │   └── GameState.ts         # State machine (MENU, PLAYING, PAUSED, GAMEOVER, WIN)
 ├── entities/
 │   ├── Paddle.ts            # Player paddle with mouse/keyboard controls
-│   ├── Ball.ts              # Ball physics, bouncing, lifecycle
-│   ├── Brick.ts             # Brick entity
-│   ├── PowerUp.ts           # Power-up with 5 types (wide, multi, laser, slow, spread)
-│   └── index.ts             # Entity exports
+│   ├── Ball.ts              # Ball physics, bouncing, lifecycle, trail effect
+│   ├── Brick.ts             # Brick entity with destruction animation
+│   ├── PowerUp.ts           # Power-up with rotation and pulse animation
+│   └── index.ts             # Entity exports (deprecated, not used)
 ├── logic/
 │   ├── BrickManager.ts      # 5-row brick layout, spawning
 │   ├── ScoreManager.ts      # Score and lives tracking
-│   └── PowerUpManager.ts    # Power-up spawn rates, collection logic
+│   ├── PowerUpManager.ts    # Power-up spawn rates, collection logic
+│   ├── LevelManager.ts      # Level loading and management
+│   └── LevelEditorManager.ts # Level editor grid management
 ├── renderer/
-│   └── Renderer.ts          # Canvas drawing, HUD, menus
+│   └── Renderer.ts          # Canvas drawing, HUD, menus, background stars
 ├── utils/
 │   ├── CollisionSystem.ts   # AABB collision detection
-│   └── InputHandler.ts      # Keyboard/mouse event handling
+│   ├── InputHandler.ts      # Keyboard/mouse event handling
+│   ├── ParticleSystem.ts    # Particle effects for collisions
+│   ├── KubernetesService.ts # K8s API communication
+│   ├── AssetLoader.ts       # SVG asset loading
+│   └── LevelLoader.ts       # Level JSON loading
+├── components/
+│   └── LevelEditor.ts       # Level editor UI component
+├── types.d.ts               # Module declarations (*.json)
 ├── main.ts                  # Entry point, initializes Game
 └── style.css                # Fullscreen canvas styling
+
+public/
+└── assets/                  # Static assets (crack.svg, etc.)
+
+e2e/
+├── unit/                    # Unit tests (moved from src/__tests__)
+│   └── LevelEditorManager.test.ts
+└── *.spec.ts                # Playwright E2E tests
+
+levels/                        # JSON level configurations (level1-11.json)
 ```
 
 ## Mobile Optimization
 
 ### Game Speed
 
-- **Desktop**: Default game speed 0.5 (50%)
-- **Mobile**: Automatic detection via user agent and touch capability
-- **Mobile Speed**: 0.75 (75%) - 25% faster for better mobile gameplay
-- Detection: `navigator.userAgent` regex + `window.matchMedia('(pointer: coarse)')`
+- **Base Speed**: 1.0 (default for both mobile and desktop)
+- **Desktop**: Final speed = baseSpeed × 1.7
+- **Mobile**: Final speed = baseSpeed × 0.75
+- **Level Config**: `gameSpeed` in JSON is multiplied by platform factor
+- **Detection**: `navigator.userAgent` regex + `window.matchMedia('(pointer: coarse)')`
 
 ### Mobile Controls
 
@@ -71,12 +93,54 @@ src/
 - Tap/click to launch ball
 - Touch events use passive listeners for smooth scrolling
 
+## Visual Effects
+
+### Particle System
+- Spawns on brick destruction and power-up collection
+- Max 50 particles simultaneously
+- Each particle has physics-based movement and fade-out
+- Optimized with active particle tracking to prevent processing dead particles
+
+### Ball Trail
+- Smooth quadratic curve path (not individual arcs)
+- Dynamic length based on speed (prevents trails from being too long at high speeds)
+- Gradient opacity from front to back
+- Desktop: ~9 trail points, Mobile: ~20 trail points
+
+### Screen Shake
+- Triggered on brick destruction and power-up collection
+- Red bricks cause more intense shake (4px) than regular bricks (2px)
+- Decay factor of 0.85 per frame
+
+### Brick Destruction FX
+- Scale animation (1.0 → 1.4 → 0)
+- Fade-out opacity
+- Flash effect (white overlay)
+- Particle explosion
+- Crack image overlay for damaged bricks
+
+### Background Stars
+- 20 stars with parallax effect
+- Random sizes (0.5-2px) and speeds (0.2-0.7 px/frame)
+- Opacity varies (0.3-1.0)
+- Stars wrap around when off-screen
+
+### Power-Up Animations
+- Pulse effect (scale oscillation)
+- Subtle rotation
+- Glow with shadowBlur
+
+### Paddle Glow
+- Outer glow with shadowBlur
+- Center highlight for depth
+- Shake effect when hit by ball
+
 ## Key Patterns
 
 ### Game State Machine
 
 ```typescript
-// States: MENU, PLAYING, PAUSED, GAMEOVER, WIN
+// States: MENU, PLAYING, PAUSED, GAMEOVER, WIN, LEVEL_COMPLETE, CUSTOM_WIN
 // Only PLAYING state runs update loop
 if (this.gameState.state !== GameState.GameStateState.PLAYING) return;
 ```
@@ -95,8 +159,9 @@ if (this.gameState.state !== GameState.GameStateState.PLAYING) return;
 ### Power-up System
 
 ```typescript
-// 5 power-up types: wide, multi, laser, slow, spread
-// Spawn rate: 5 bricks, 60% chance (after fix)
+// 5 power-up types: wide, multi, laser, slow, life
+// Spawn rate: 5 bricks (configurable per level)
+// Spawn chance: 60%
 // Duration: 10 seconds for most power-ups
 // Activation: Automatic on collection in Game.activatePowerUp()
 ```
@@ -108,35 +173,59 @@ if (this.gameState.state !== GameState.GameStateState.PLAYING) return;
 // Lasers stored in array with {x, y, width, height, speed, active}
 // Collision: Simple AABB against bricks
 // Visual: Red glow with shadowBlur
+// When laser destroys brick: triggers particle effect, shake, destruction animation
+```
+
+### FPS Performance Monitoring
+
+```typescript
+// Real-time FPS counter (toggle with backtick key)
+// Performance logs to console every 10 seconds
+// Tracks: FPS, particle count, ball count, power-up count
+// Targets: 60+ FPS desktop, 30+ FPS mobile
 ```
 
 ## Important Files
 
 ### Game.ts
 - Main orchestrator
-- Manages: paddle, balls, bricks, power-ups, lasers
+- Manages: paddle, balls, bricks, power-ups, lasers, particles
 - Update loop: filters inactive balls, checks win condition
 - Laser cooldown: 200ms between shots
+- Performance monitoring: FPS tracking, logging every 10 seconds
+- Speed management: applies platform multiplier (0.75 mobile, 1.7 desktop)
 
 ### Ball.ts
 - `active` flag: false when off-screen
 - `launched` flag: false when attached to paddle
 - `isMain` flag: tracks original ball vs. spawned balls
 - Update: moves to paddle position if not launched
+- Trail: dynamic length based on speed multiplier
+
+### Brick.ts
+- Red bricks have 2 health, regular bricks have 1
+- `startDestroy()` triggers scale/fade animation
+- `crackImage` overlay when damaged (requires AssetLoader)
+- Particle explosion on destruction
 
 ### PowerUpManager.ts
-- `spawnRate`: 5 bricks
+- `spawnRate`: 5 bricks (configurable)
 - `spawnChance`: 60%
 - `lastSpawnBrickIndex`: tracks which brick spawned last (prevents timer bug)
 - Debug mode: spawns all 5 types when 'D' pressed
+
+### ParticleSystem.ts
+- Max 50 particles
+- Active particle tracking to prevent processing dead particles
+- Optimized filtering in update loop
 
 ## Common Tasks
 
 ### Adding a New Power-up
 
 1. Add type to `PowerUpType` in `PowerUp.ts:1`
-2. Add case in `PowerUp.ts:25-46` for color/label
-3. Add activation logic in `Game.ts:229-277` (`activatePowerUp`)
+2. Add case in `PowerUp.ts:28-49` for color/label
+3. Add activation logic in `Game.ts:584-626` (`activatePowerUp`)
 4. Add to spawn array in `PowerUpManager.ts:42` or `56`
 
 ### Changing Spawn Rates
@@ -154,6 +243,7 @@ private spawnChance: number = 0.6; // 60% chance
 private laserCooldown: number = 200; // ms between shots
 private updateLasers(): void {
   // Spawns lasers, updates positions, checks collision
+  // When laser destroys brick: triggers particle effect, shake, destruction animation
 }
 ```
 
@@ -161,12 +251,27 @@ private updateLasers(): void {
 
 1. Add to `GameState.ts` enum
 2. Handle in `Game.ts:89-106` (keydown)
-3. Add draw case in `Game.ts:279-304` (`draw`)
+3. Add draw case in `Game.ts:646-680` (`draw`)
 4. Update state machine logic
+
+### Adjusting Game Speed
+
+```typescript
+// Level config JSON
+{
+  "gameSpeed": 0.5,  // Will be multiplied by 0.75 (mobile) or 1.7 (desktop)
+  "ballSpeed": 5,
+  "powerUpSpawnRate": 5
+}
+
+// Final execution speed:
+// Desktop: 0.5 × 1.7 = 0.85
+// Mobile: 0.5 × 0.75 = 0.375
+```
 
 ## Testing
 
-### Playwright Tests (e2e/KBB.spec.ts)
+### Playwright Tests (e2e/*.spec.ts)
 
 Tests cover:
 - Menu navigation
@@ -177,10 +282,19 @@ Tests cover:
 - Score/lives
 - Pause/resume
 - Game over/win conditions
+- Level editor functionality
+- Mobile controls
+- K8s pod termination
 
 ```bash
-npm run test:e2e     # Run all tests
+npm run test:e2e     # Run all E2E tests
 npm run test:e2e -- -g "laser"  # Run specific test
+```
+
+### Vitest Tests (e2e/unit/*.test.ts)
+
+```bash
+npm run test:unit    # Run unit tests
 ```
 
 ## Debugging
@@ -192,12 +306,26 @@ Shows:
 - Type labels for each power-up
 - Spawn timer and count
 
+### FPS Display (Press `` ` `` in-game)
+
+Shows:
+- Real-time FPS counter in top-left corner
+- Performance metrics in console every 10 seconds
+
 ### Console Messages
 
 Check browser console for:
 - TypeScript compilation errors
 - Runtime exceptions
 - Network requests (Playwright)
+- Performance logs (FPS, particle count, ball count, power-up count)
+
+### Performance Logging
+
+Console logs every 10 seconds show:
+```
+[HH:MM:SS] FPS: 60, Particles: 12, Balls: 3, PowerUps: 2
+```
 
 ## Build & Deployment
 
@@ -290,6 +418,9 @@ See `k8s/DEPLOYMENT.md` for full documentation.
 3. **Ball respawning too early** → Fixed: only spawn when balls.length === 0
 4. **Laser only visual** → Fixed: added laser projectiles with collision
 5. **Top wall collision** → Fixed: ball now bounces off all walls
+6. **Laser not triggering destruction FX** → Fixed: added particleSystem.spawn(), triggerShake(), startDestroy()
+7. **Ball trail too long on desktop** → Fixed: dynamic trail length based on speed
+8. **FPS drops with visual effects** → Fixed: optimized particle system, reduced stars, simplified trails
 
 ## Code Conventions
 
@@ -298,6 +429,7 @@ See `k8s/DEPLOYMENT.md` for full documentation.
 - Type safety: all variables have explicit types
 - Private methods prefixed with `this.`
 - Constants at top of class
+- No unused imports or dead code
 
 ## Performance Tips
 
@@ -305,22 +437,30 @@ See `k8s/DEPLOYMENT.md` for full documentation.
 - Use requestAnimationFrame for smooth rendering
 - Reuse objects where possible
 - Avoid garbage collection in update loop
+- Minimize ctx.save()/ctx.restore() calls
+- Use single path for trails instead of multiple arcs
+- Limit particle count to max 50
+- Reduce background elements (20 stars instead of 60)
+- Apply platform-specific speed multipliers
 
 ## Security Notes
 
-- No external API calls
+- No external API calls (except K8s middleware)
 - No user data collection
 - All state in memory (no localStorage yet)
 - Canvas sandboxed by browser
+- K8s middleware has minimal RBAC permissions
 
 ## Future Roadmap
 
 1. **Audio**: Web Audio API for sound effects
-2. **Particles**: Collision particle effects
-3. **Assets**: Sprite images for power-ups
-4. **Music**: Background music system
-5. **High Scores**: localStorage persistence
-6. **Boss Battles**: Special brick patterns
+2. **Assets**: Sprite images for power-ups
+3. **Music**: Background music system
+4. **High Scores**: localStorage persistence
+5. **Boss Battles**: Special brick patterns
+6. **Leaderboards**: Remote high score tracking
+7. **Achievements**: Unlockable badges and rewards
+8. **Daily Challenges**: Random level generation
 
 ## Support
 
@@ -329,83 +469,19 @@ For issues:
 2. Run `npm run build` to verify TypeScript
 3. Check Playwright tests pass
 4. Review AGENTS.md for patterns
+5. Check performance logs in console
 
-## Kubernetes Deployment
+## Git Workflow
 
-### Files Created
+- `main` - Production-ready code
+- `feature/*` - Feature branches (e.g., `feature/visual-polish`)
+- Always create feature branches from main
+- Keep branches up to date with main
+- Code review required before merging
 
-**Dockerfiles:**
-- `Dockerfile.front` - Multi-stage build with Caddy server
-- `Dockerfile.backend` - Go binary for middleware
+## Environment Variables
 
-**Kubernetes Manifests:**
-- `k8s/rbac.yaml` - ServiceAccount, Role, RoleBinding for pod management
-- `k8s/middleware-deployment.yaml` - Middleware deployment with health checks
-- `k8s/frontend-deployment.yaml` - Frontend deployment, service & ingress
-- `Caddyfile` - Caddy server configuration
-
-**Documentation:**
-- `k8s/DEPLOYMENT.md` - Complete deployment guide
-- `K8S_QUICKSTART.md` - Quick start guide
-- `.env.example` - Environment variables template
-
-### RBAC Security
-
-The middleware has minimal required permissions:
-```yaml
-resources: ["pods"]
-verbs: ["get", "list", "watch", "delete"]
-```
-
-- Only operates in `default` namespace
-- Excludes `kube-system` namespace
-- Cannot modify pod specs or access secrets
-
-### Health Checks
-
-Both deployments include:
-- **Liveness probe**: `/health` endpoint (frontend), `/status` (middleware)
-- **Readiness probe**: `/health` endpoint
-- **Resource limits**: 64-128Mi memory, 50-100m CPU
-
-### Caddy Server Features
-
-- Automatic compression (gzip, br, zstd)
-- CORS headers for API proxy
-- Static file serving from `/app/dist`
-- Health check endpoint at `/health`
-- API proxy to middleware at `/api/v1/pod/terminate`
-
-### Middleware API Endpoints
-
-- `GET /status` - Returns cluster status and running pod count
-- `DELETE /api/v1/pod/terminate` - Terminates random running pod
-
-### Common Operations
-
-```bash
-# Deploy
-make k8s
-
-# Port forward for testing
-kubectl port-forward svc/KBB-frontend 8080:80
-
-# Check logs
-kubectl logs -l app=k8s-middleware -f
-
-# Scale manually (if using HPA)
-kubectl scale deployment KBB-frontend --replicas=3
-```
-
-### Production Considerations
-
-1. **Kubeconfig Access**: Mount as secret, not ConfigMap
-2. **Image Registry**: Use private registry for production images
-3. **Network Policies**: Restrict middleware access to frontend only
-4. **PodDisruptionBudget**: Ensure high availability during upgrades
-5. **Horizontal Pod Autoscaler**: Scale based on CPU/memory usage
-
-See `k8s/DEPLOYMENT.md` for detailed production guide.
+See `.env.example` for available configuration options.
 
 ## CI/CD with GitHub Actions
 
