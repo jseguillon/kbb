@@ -1,27 +1,17 @@
 import type { LevelConfig } from '../logic/LevelManager';
 
-// Import all levels as modules to be bundled in the build
-import level1 from '../levels/level1.json';
-import level2 from '../levels/level2.json';
-import level3 from '../levels/level3.json';
-import level4 from '../levels/level4.json';
-import level5 from '../levels/level5.json';
-import level6 from '../levels/level6.json';
-import level7 from '../levels/level7.json';
-import level8 from '../levels/level8.json';
-import level9 from '../levels/level9.json';
+// Dynamically import all level JSON files from the levels directory
+const levelModules = import.meta.glob('../levels/*.json', { eager: true });
 
-const levelsData: Record<string, any> = {
-  1: level1,
-  2: level2,
-  3: level3,
-  4: level4,
-  5: level5,
-  6: level6,
-  7: level7,
-  8: level8,
-  9: level9,
-};
+const levelsData: Record<string, any> = {};
+
+// Sort files alphabetically and assign sequential IDs
+const sortedFiles = Object.keys(levelModules).sort();
+sortedFiles.forEach((path, index) => {
+  const id = (index + 1).toString();
+  const data = (levelModules[path] as { default: any }).default;
+  levelsData[id] = data;
+});
 
 export type ParsedLevel = {
   name: string;
