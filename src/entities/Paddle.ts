@@ -49,41 +49,27 @@ export class Paddle {
 
   draw(ctx: CanvasRenderingContext2D) {
     let baseColor = '#00ff88';
-    let innerGlowColor = '#00ff88';
-    let outerGlowColor = '#00ff88';
     let shakeX = 0;
 
     if (this.shakeTimer > 0) {
       const hue = Math.floor(this.hueOffset);
       baseColor = `hsl(${hue}, 100%, 50%)`;
-      innerGlowColor = baseColor;
-      outerGlowColor = baseColor;
       shakeX = (Math.random() - 0.5) * 4;
     }
 
-    // Outer glow
     ctx.fillStyle = baseColor;
-    ctx.shadowColor = outerGlowColor;
-    ctx.shadowBlur = 25;
+    ctx.shadowColor = baseColor;
+    ctx.shadowBlur = 20;
     
     ctx.beginPath();
     ctx.roundRect(this.x + shakeX, this.y, this.width, this.height, 8);
     ctx.fill();
     
-    // Inner glow
-    ctx.shadowBlur = 10;
-    ctx.fillStyle = innerGlowColor;
-    ctx.beginPath();
-    ctx.roundRect(this.x + shakeX + 2, this.y + 2, this.width - 4, this.height - 4, 6);
-    ctx.fill();
-    
-    // Center highlight
     ctx.shadowBlur = 0;
+    
     ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
     ctx.beginPath();
     ctx.roundRect(this.x + shakeX + 3, this.y + 3, this.width - 6, this.height / 2 - 2, 4);
     ctx.fill();
-    
-    ctx.shadowBlur = 0;
   }
 }

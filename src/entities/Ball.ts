@@ -99,30 +99,38 @@ export class Ball {
   }
 
   draw(ctx: CanvasRenderingContext2D) {
-    // Draw trail more efficiently
-    if (this.trail.length > 1) {
-      for (let i = 0; i < this.trail.length; i++) {
+    if (this.trail.length > 0) {
+      const firstPoint = this.trail[0];
+      
+      ctx.beginPath();
+      ctx.moveTo(firstPoint.x, firstPoint.y);
+      
+      for (let i = 1; i < this.trail.length; i++) {
         const point = this.trail[i];
-        const opacity = point.opacity * (i / this.trail.length);
-        const size = this.radius * (0.5 + 0.5 * (i / this.trail.length));
-        
-        ctx.globalAlpha = Math.max(0.1, opacity);
-        ctx.beginPath();
-        ctx.arc(point.x, point.y, size, 0, Math.PI * 2);
-        ctx.fill();
+        const cpX = (point.x + this.trail[i - 1].x) / 2;
+        const cpY = (point.y + this.trail[i - 1].y) / 2;
+        ctx.quadraticCurveTo(this.trail[i - 1].x, this.trail[i - 1].y, cpX, cpY);
       }
-      ctx.globalAlpha = 1.0;
+      
+      ctx.lineTo(this.x, this.y);
+      
+      const gradient = ctx.createLinearGradient(
+        firstPoint.x, firstPoint.y,
+        this.x, this.y
+      );
+      gradient.addColorStop(0, 'rgba(255, 68, 68, 0)');
+      gradient.addColorStop(1, 'rgba(255, 68, 68, 0.6)');
+      
+      ctx.strokeStyle = gradient;
+      ctx.lineWidth = this.radius * 0.8;
+      ctx.lineCap = 'round';
+      ctx.stroke();
     }
     
-    // Draw main ball
     ctx.beginPath();
     ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
     ctx.fillStyle = '#ff4444';
-    ctx.shadowColor = '#ff4444';
-    ctx.shadowBlur = 10;
     ctx.fill();
     ctx.closePath();
-    
-    ctx.shadowBlur = 0;
   }
 }

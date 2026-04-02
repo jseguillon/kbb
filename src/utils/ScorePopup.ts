@@ -28,20 +28,14 @@ export class ScorePopup {
     const bounce = Math.sin((this.maxLife - this.life) * 0.3) * 3;
     
     ctx.save();
-    ctx.translate(0, bounce);
     ctx.globalAlpha = opacity;
-    
     ctx.fillStyle = this.color;
     ctx.font = 'bold 20px Arial';
     ctx.textAlign = 'center';
     ctx.shadowColor = this.color;
     ctx.shadowBlur = 8;
-    
-    ctx.fillText(`+${this.value}`, this.x, this.y);
-    
+    ctx.fillText(`+${this.value}`, this.x, this.y + bounce);
     ctx.restore();
-    ctx.globalAlpha = 1.0;
-    ctx.shadowBlur = 0;
   }
 
   isExpired(): boolean {

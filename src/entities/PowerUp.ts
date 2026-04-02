@@ -59,20 +59,23 @@ export class PowerUp {
     if (!this.active) return;
 
     const pulse = 1 + Math.sin(this.pulsePhase) * 0.08;
-    const glow = 8 + Math.sin(this.pulsePhase) * 4;
+    const effectiveWidth = this.width * pulse;
+    const effectiveHeight = this.height * pulse;
+    const offsetX = (this.width - effectiveWidth) / 2;
+    const offsetY = (this.height - effectiveHeight) / 2;
 
     ctx.save();
-    ctx.translate(this.x + this.width / 2, this.y + this.height / 2);
-    ctx.scale(pulse, pulse);
+    ctx.translate(this.x + this.width / 2 + Math.sin(this.rotation * Math.PI / 180) * 2, 
+                  this.y + this.height / 2 + Math.cos(this.rotation * Math.PI / 180) * 2);
     ctx.rotate((this.rotation * Math.PI) / 180);
     ctx.translate(-(this.x + this.width / 2), -(this.y + this.height / 2));
 
     ctx.fillStyle = this.color;
     ctx.shadowColor = this.color;
-    ctx.shadowBlur = glow;
+    ctx.shadowBlur = 8;
 
     ctx.beginPath();
-    ctx.roundRect(this.x, this.y, this.width, this.height, 4);
+    ctx.roundRect(this.x + offsetX, this.y + offsetY, effectiveWidth, effectiveHeight, 4);
     ctx.fill();
 
     ctx.fillStyle = '#ffffff';

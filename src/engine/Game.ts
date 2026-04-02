@@ -67,7 +67,7 @@ export class Game {
   private lastFpsUpdate: number = 0;
   private currentFps: number = 0;
   private performanceLog: string[] = [];
-  private maxPerformanceLog: number = 50;
+  private maxPerformanceLog: number = 20;
   private debugMode: boolean = false;
 
   private isRedBrick(color: string): boolean {
@@ -88,9 +88,11 @@ export class Game {
       this.frameCount = 0;
       this.lastFpsUpdate = now;
       
-      // Log performance every 5 seconds
-      if (now % 5000 < 1000) {
-        this.logPerformance(`FPS: ${this.currentFps}, Particles: ${this.particleSystem['particles'].length}, Balls: ${this.balls.length}, PowerUps: ${this.powerUpManager['powerUps'].length}`);
+      // Log performance every 10 seconds
+      if (Math.floor(now / 10000) > Math.floor((now - 1000) / 10000)) {
+        const particleCount = (this.particleSystem as any).particles.filter((p: any) => p.active).length;
+        const powerUpCount = (this.powerUpManager as any).powerUps.filter((p: any) => p.active).length;
+        this.logPerformance(`FPS: ${this.currentFps}, Particles: ${particleCount}, Balls: ${this.balls.length}, PowerUps: ${powerUpCount}`);
       }
     }
   }

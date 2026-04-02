@@ -15,7 +15,7 @@ export class Renderer {
     this.ctx = ctx;
     this.width = width;
     this.height = height;
-    this.stars = this.generateStars(60);
+    this.stars = this.generateStars(20);
   }
 
   setFps(fps: number): void {
@@ -46,7 +46,7 @@ export class Renderer {
   setDimensions(width: number, height: number) {
     this.width = width;
     this.height = height;
-    this.stars = this.generateStars(60);
+    this.stars = this.generateStars(20);
   }
 
   private generateStars(count: number): Array<{x: number, y: number, size: number, speed: number, opacity: number}> {
@@ -61,6 +61,17 @@ export class Renderer {
       });
     }
     return stars;
+  }
+
+  private drawStars(): void {
+    this.ctx.fillStyle = '#ffffff';
+    for (const star of this.stars) {
+      this.ctx.globalAlpha = star.opacity;
+      this.ctx.beginPath();
+      this.ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+      this.ctx.fill();
+    }
+    this.ctx.globalAlpha = 1.0;
   }
 
   private updateStars(): void {
@@ -87,14 +98,7 @@ export class Renderer {
     
     // Draw stars
     this.updateStars();
-    this.ctx.fillStyle = '#ffffff';
-    this.stars.forEach(star => {
-      this.ctx.globalAlpha = star.opacity;
-      this.ctx.beginPath();
-      this.ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
-      this.ctx.fill();
-    });
-    this.ctx.globalAlpha = 1.0;
+    this.drawStars();
     
     // Subtle grid overlay
     this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.01)';
