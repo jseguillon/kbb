@@ -1,32 +1,27 @@
 # KBB Brick Breaker Game
 
-A modern, browser-based KBB-style brick breaker game built with Vite, TypeScript, and Playwright.
+A modern, browser-based brick breaker game that can destroy Pods on your Kubernetes cluster !
 
-## Features
+Entirely vibe coded with Open Code and Qwen 3.5 35B A3. Not a single human line of code !!
 
-- **Core Gameplay**: Classic brick breaker mechanics with paddle, ball, and destructible bricks
-- **Power-up System**: 5 unique power-ups that activate when collected:
-  - **W (Wide)**: Expands paddle width by 50% for 10 seconds
-  - **M (Multi)**: Splits the main ball into additional balls
-  - **L (Laser)**: Automatically shoots lasers from paddle to destroy bricks (200ms cooldown)
-  - **S (Slow)**: Reduces ball speed by 40% for 10 seconds
-  - **P (Spread)**: Creates 2 additional balls with reduced velocity
-- **Multiple Balls**: Support for multiple simultaneous balls (up to 3)
-- **Score & Lives**: Track your score and remaining lives (3 starting lives)
-- **Debug Mode**: Press 'D' to visualize power-up spawn locations
-- **Pause Functionality**: Press ESC to pause/resume the game
-- **Responsive Design**: Adapts to different screen sizes
-- **E2E Testing**: Comprehensive Playwright tests for reliability
+## Demo
 
-## Controls
+Play the game online at: **https://jseguillon.github.io/kbb/?simulate=true**
 
-| Key/Action | Function |
-|------------|----------|
-| Arrow Left/Right | Move paddle (keyboard) |
-| Mouse Move | Move paddle (mouse) |
-| Space/Enter/Click | Launch ball(s) |
-| ESC | Pause/Resume game |
-| D | Toggle debug mode (show power-up locations) |
+### Create Your Own Level via the Editor
+
+Anyone can create and submit a custom level! Here's how:
+
+1. Visit the level editor at **https://jseguillon.github.io/kbb/?editor=true**
+2. Use the editor to design your level:
+   - Click or drag to place bricks
+   - Right-click or drag to erase bricks
+   - Adjust game speed, laser cooldown, and power-up probabilities
+3. Save your level and download the JSON file
+4. Submit a Pull Request with your level file in the `src/levels/` directory
+
+**Important**: If your level grid creates a product name, it must be a CNCF (Cloud Native Computing Foundation) project.
+
 
 ## Getting Started
 
@@ -71,24 +66,6 @@ npm run test:e2e
 3. Move paddle with arrow keys or mouse
 4. Press Space/Enter to launch the ball
 5. Destroy all bricks to win!
-
-## Demo
-
-Play the game online at: **https://jseguillon.github.io/kbb/?simulate=true**
-
-### Create Your Own Level
-
-Anyone can create and submit a custom level! Here's how:
-
-1. Visit the level editor at **https://jseguillon.github.io/kbb/?simulate=true**
-2. Use the editor to design your level:
-   - Click or drag to place bricks
-   - Right-click or drag to erase bricks
-   - Adjust game speed, laser cooldown, and power-up probabilities
-3. Save your level and download the JSON file
-4. Submit a Pull Request with your level file in the `src/levels/` directory
-
-**Important**: If your level contains a product name (e.g., `docker-level.json`, `kubernetes-level.json`), it must be a CNCF (Cloud Native Computing Foundation) project. Examples of CNCF projects include Kubernetes, Docker, Prometheus, Envoy, and other graduated or sandbox projects under the CNCF umbrella.
 
 ## Game Architecture
 
@@ -139,6 +116,32 @@ Tests cover:
 - Score and lives tracking
 - Pause/resume functionality
 
+## Features
+
+- **Core Gameplay**: Classic brick breaker mechanics with paddle, ball, and destructible bricks
+- **Power-up System**: 5 unique power-ups that activate when collected:
+  - **W (Wide)**: Expands paddle width by 50% for 10 seconds
+  - **M (Multi)**: Splits the main ball into additional balls
+  - **L (Laser)**: Automatically shoots lasers from paddle to destroy bricks (200ms cooldown)
+  - **S (Slow)**: Reduces ball speed by 40% for 10 seconds
+  - **P (Spread)**: Creates 2 additional balls with reduced velocity
+- **Multiple Balls**: Support for multiple simultaneous balls (up to 3)
+- **Score & Lives**: Track your score and remaining lives (3 starting lives)
+- **Debug Mode**: Press 'D' to visualize power-up spawn locations
+- **Pause Functionality**: Press ESC to pause/resume the game
+- **Responsive Design**: Adapts to different screen sizes
+- **E2E Testing**: Comprehensive Playwright tests for reliability
+
+## Controls
+
+| Key/Action | Function |
+|------------|----------|
+| Arrow Left/Right | Move paddle (keyboard) |
+| Mouse Move | Move paddle (mouse) |
+| Space/Enter/Click | Launch ball(s) |
+| ESC | Pause/Resume game |
+| D | Toggle debug mode (show power-up locations) |
+
 ## Development
 
 ### Project Structure
@@ -157,12 +160,11 @@ Tests cover:
 ## Future Enhancements
 
 - [ ] Sound effects (Web Audio API)
-- [ ] Particle effects for collisions
+- [X] Particle effects for collisions
 - [ ] Multiple levels with increasing difficulty
-- [ ] Power-up sprites and icons
+- [X] Power-up sprites and icons
 - [ ] Background music
-- [ ] High score persistence (localStorage)
-- [ ] Boss battles
+- [X] High score persistence (localStorage)
 
 ## License
 
