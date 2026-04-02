@@ -269,8 +269,8 @@ const { row, col } = getGridFromEvent(_e);
       isMouseDown = false;
     });
     
-    // Update cursor position on hover (not just click)
-    canvas.addEventListener('mouseover', (e: MouseEvent) => {
+    // Update cursor position on mouse move over grid
+    canvas.addEventListener('mousemove', (e: MouseEvent) => {
       const { row, col } = getGridFromEvent(e);
       updateCursorPosition(row, col);
     });
