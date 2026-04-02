@@ -548,6 +548,10 @@ constructor(canvas: HTMLCanvasElement, levelManager?: LevelManager) {
         this.scoreManager.addScore(10);
         
         if (hitBrick.health <= 0) {
+          hitBrick.startDestroy();
+          const particleCount = this.isRedBrick(hitBrick.color) ? 12 : 8;
+          this.triggerShake(this.isRedBrick(hitBrick.color) ? 4 : 2);
+          this.particleSystem.spawn(hitBrick.x + hitBrick.width / 2, hitBrick.y + hitBrick.height / 2, hitBrick.color, particleCount);
           this.brickManager.removeBrick(hitBrick);
           this.trySpawnPowerUp(hitBrick);
           if (this.isRedBrick(hitBrick.color)) {
