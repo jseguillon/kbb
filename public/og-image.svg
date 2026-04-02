@@ -1,7 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
-  <rect width="1200" height="630" fill="#0a0a1a"/>
-  <text x="600" y="200" font-family="Arial, sans-serif" font-size="72" font-weight="bold" fill="#00ff88" text-anchor="middle">🎮 KBB</text>
-  <text x="600" y="280" font-family="Arial, sans-serif" font-size="48" fill="#ffffff" text-anchor="middle">Kubernetes Brick Breaker</text>
-  <text x="600" y="360" font-family="Arial, sans-serif" font-size="32" fill="#cccccc" text-anchor="middle">Destroy bricks. Collect power-ups. Terminate pods!</text>
-  <text x="600" y="480" font-family="Arial, sans-serif" font-size="24" fill="#00ccff" text-anchor="middle">↔️ Wide  🔴 Multi  👾 Laser  🐌 Slow  ❤️ Life</text>
-</svg>
