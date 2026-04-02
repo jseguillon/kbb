@@ -72,6 +72,24 @@ npm run test:e2e
 4. Press Space/Enter to launch the ball
 5. Destroy all bricks to win!
 
+## Demo
+
+Play the game online at: **https://jseguillon.github.io/kbb/?simulate=true**
+
+### Create Your Own Level
+
+Anyone can create and submit a custom level! Here's how:
+
+1. Visit the level editor at **https://jseguillon.github.io/kbb/?simulate=true**
+2. Use the editor to design your level:
+   - Click or drag to place bricks
+   - Right-click or drag to erase bricks
+   - Adjust game speed, laser cooldown, and power-up probabilities
+3. Save your level and download the JSON file
+4. Submit a Pull Request with your level file in the `src/levels/` directory
+
+**Important**: If your level contains a product name (e.g., `docker-level.json`, `kubernetes-level.json`), it must be a CNCF (Cloud Native Computing Foundation) project. Examples of CNCF projects include Kubernetes, Docker, Prometheus, Envoy, and other graduated or sandbox projects under the CNCF umbrella.
+
 ## Game Architecture
 
 ```
