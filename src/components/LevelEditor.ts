@@ -9,6 +9,10 @@ export class LevelEditor {
   private brickHeight: number = 30;
   private padding: number = 3;
   private isMobile: boolean = false;
+  private isErasing: boolean = false;
+  private undoStack: Array<{grid: (string | null)[][]}> = [];
+  private redoStack: Array<{grid: (string | null)[][]}> = [];
+  private readonly MAX_UNDO = 20;
 
   constructor() {
     this.isMobile = this.detectMobile();
@@ -146,7 +150,8 @@ The sum of all power-up probabilities must equal 1.0 (100%).
       </div>
       
       <div class="editor-footer">
-        <span class="info-text">Grid: 24 columns × 16 rows | Click to edit bricks</span>
+        <span class="info-text">Grid: 24 columns × 16 rows | Left Click: Draw | Right Click: Erase | Hold: Draw Line | <strong>Ctrl+Z: Undo</strong> | <strong>Ctrl+Y: Redo</strong></span>
+        <span class="cursor-position" id="cursorPosition">Pos: 0, 0</span>
       </div>
     `;
     
@@ -199,8 +204,10 @@ The sum of all power-up probabilities must equal 1.0 (100%).
     // Draw initial grid
     this.drawCanvas(ctx);
     
-    // Mouse click - place brick
-    canvas.addEventListener('click', (e: MouseEvent) => {
+    // Track mouse movement for cursor position and drawing
+    let isMouseDown = false;
+    
+    const getGridFromEvent = (e: MouseEvent) => {
       const rect = canvas.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
@@ -208,22 +215,63 @@ The sum of all power-up probabilities must equal 1.0 (100%).
       const col = Math.floor(x / (this.brickWidth + this.padding));
       const row = Math.floor(y / (this.brickHeight + this.padding));
       
-      this.editorManager.setCell(row, col, this.selectedColor);
-      this.drawCanvas(ctx);
+      return { row, col, x, y };
+    };
+    
+    const updateCursorPosition = (row: number, col: number) => {
+      if (row >= 0 && row < this.editorManager.getGridSize().rows &&
+          col >= 0 && col < this.editorManager.getGridSize().cols) {
+        const cursorDisplay = this.container.querySelector('#cursorPosition');
+        if (cursorDisplay) {
+          cursorDisplay.textContent = `Pos: ${col + 1}, ${row + 1}`;
+        }
+      }
+    };
+    
+    canvas.addEventListener('mousedown', (_e: MouseEvent) => {
+      _e.preventDefault();
+      isMouseDown = true;
+const { row, col } = getGridFromEvent(_e);
+      updateCursorPosition(row, col);
+      
+      this.isErasing = _e.button === 2;
+      this.saveToUndoStack();
+      if (this.isErasing) {
+        this.editorManager.setCell(row, col, null);
+        this.drawCanvas(ctx);
+      } else {
+        this.saveToUndoStack();
+        this.editorManager.setCell(row, col, this.selectedColor);
+        this.drawCanvas(ctx);
+      }
+    });
+    
+    canvas.addEventListener('mousemove', (_e: MouseEvent) => {
+      if (!isMouseDown) return;
+      _e.preventDefault();
+      const { row, col } = getGridFromEvent(_e);
+      updateCursorPosition(row, col);
+      
+      if (this.isErasing) {
+        this.editorManager.setCell(row, col, null);
+        this.drawCanvas(ctx);
+      } else {
+        this.editorManager.setCell(row, col, this.selectedColor);
+        this.drawCanvas(ctx);
+      }
+    });
+    
+    canvas.addEventListener('mouseup', () => {
+      isMouseDown = false;
+    });
+    
+    canvas.addEventListener('mouseleave', () => {
+      isMouseDown = false;
     });
     
     // Right click - delete brick
     canvas.addEventListener('contextmenu', (e: MouseEvent) => {
       e.preventDefault();
-      const rect = canvas.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      
-      const col = Math.floor(x / (this.brickWidth + this.padding));
-      const row = Math.floor(y / (this.brickHeight + this.padding));
-      
-      this.editorManager.setCell(row, col, null);
-      this.drawCanvas(ctx);
     });
     
     // Color selector
@@ -420,6 +468,27 @@ The sum of all power-up probabilities must equal 1.0 (100%).
     
     // Initial validation
     updateProbabilitySum();
+    
+    // Keyboard shortcuts - Undo (Ctrl+Z) and Redo (Ctrl+Y)
+    document.addEventListener('keydown', (e: KeyboardEvent) => {
+      if (e.ctrlKey || e.metaKey) {
+        if (e.key === 'z' || e.key === 'Z') {
+          e.preventDefault();
+          if (e.shiftKey) {
+            this.redo();
+            this.drawCanvas(ctx);
+          } else {
+            this.undo();
+            this.drawCanvas(ctx);
+          }
+        }
+        if (e.key === 'y' || e.key === 'Y') {
+          e.preventDefault();
+          this.redo();
+          this.drawCanvas(ctx);
+        }
+      }
+    });
   }
 
   private drawCanvas(ctx: CanvasRenderingContext2D): void {
@@ -780,5 +849,50 @@ The sum of all power-up probabilities must equal 1.0 (100%).
   private detectMobile(): boolean {
     const mobileRegex = /Mobile|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i;
     return mobileRegex.test(navigator.userAgent) || window.matchMedia('(pointer: coarse)').matches;
+  }
+
+  private saveToUndoStack(): void {
+    const grid = this.editorManager.getGrid();
+    this.undoStack.push({ grid: JSON.parse(JSON.stringify(grid)) });
+    if (this.undoStack.length > this.MAX_UNDO) {
+      this.undoStack.shift();
+    }
+    this.redoStack = [];
+  }
+
+  private undo(): void {
+    if (this.undoStack.length === 0) return;
+    
+    const currentGrid = this.editorManager.getGrid();
+    this.redoStack.push({ grid: JSON.parse(JSON.stringify(currentGrid)) });
+    
+    const previous = this.undoStack.pop();
+    if (previous) {
+      const grid = previous.grid;
+      this.editorManager.reset();
+      for (let r = 0; r < grid.length; r++) {
+        for (let c = 0; c < grid[r].length; c++) {
+          this.editorManager.setCell(r, c, grid[r][c]);
+        }
+      }
+    }
+  }
+
+  private redo(): void {
+    if (this.redoStack.length === 0) return;
+    
+    const currentGrid = this.editorManager.getGrid();
+    this.undoStack.push({ grid: JSON.parse(JSON.stringify(currentGrid)) });
+    
+    const next = this.redoStack.pop();
+    if (next) {
+      const grid = next.grid;
+      this.editorManager.reset();
+      for (let r = 0; r < grid.length; r++) {
+        for (let c = 0; c < grid[r].length; c++) {
+          this.editorManager.setCell(r, c, grid[r][c]);
+        }
+      }
+    }
   }
 }
