@@ -13,6 +13,7 @@ import type { PowerUpType } from '../entities/PowerUp';
 import { Brick } from '../entities/Brick';
 import { KubernetesService } from '../utils/KubernetesService';
 import { ParticleSystem } from '../utils/ParticleSystem';
+import { HighScoreManager } from '../utils/HighScoreManager';
 
 interface Laser {
   x: number;
@@ -572,6 +573,7 @@ constructor(canvas: HTMLCanvasElement, levelManager?: LevelManager) {
     
     if (this.scoreManager.getLives() <= 0) {
       this.gameState = GameState.createGameOver();
+      HighScoreManager.addHighScore(this.scoreManager.getScore());
     } else {
       this.balls = [new Ball(this.paddle.x + this.paddle.width / 2, this.paddle.y - 10, 8, true)];
     }
@@ -703,6 +705,7 @@ constructor(canvas: HTMLCanvasElement, levelManager?: LevelManager) {
       this.gameState = GameState.createLevelComplete();
     } else {
       this.gameState = GameState.createWin();
+      HighScoreManager.addHighScore(this.scoreManager.getScore());
     }
   }
 
