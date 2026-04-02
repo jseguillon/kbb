@@ -13,7 +13,6 @@ import type { PowerUpType } from '../entities/PowerUp';
 import { Brick } from '../entities/Brick';
 import { KubernetesService } from '../utils/KubernetesService';
 import { ParticleSystem } from '../utils/ParticleSystem';
-import { ScorePopupManager } from '../utils/ScorePopup';
 
 interface Laser {
   x: number;
@@ -60,7 +59,6 @@ export class Game {
   private shakeAmount: number = 0;
   private shakeDecay: number = 0.85;
   private particleSystem: ParticleSystem = new ParticleSystem();
-  private scorePopupManager: ScorePopupManager = new ScorePopupManager();
   
   // Performance monitoring
   private frameCount: number = 0;
@@ -448,7 +446,6 @@ constructor(canvas: HTMLCanvasElement, levelManager?: LevelManager) {
     this.updateLasers();
     this.updateBalls();
     this.particleSystem.update();
-    this.scorePopupManager.update();
 
     if (this.brickManager.brickList.length === 0) {
       this.handleLevelComplete();
@@ -491,7 +488,6 @@ constructor(canvas: HTMLCanvasElement, levelManager?: LevelManager) {
           const particleCount = this.isRedBrick(hitBrick.color) ? 12 : 8;
           this.triggerShake(this.isRedBrick(hitBrick.color) ? 4 : 2);
           this.particleSystem.spawn(hitBrick.x + hitBrick.width / 2, hitBrick.y + hitBrick.height / 2, hitBrick.color, particleCount);
-          this.scorePopupManager.spawn(hitBrick.x + hitBrick.width / 2, hitBrick.y, 10, hitBrick.color);
           this.brickManager.removeBrick(hitBrick);
           this.trySpawnPowerUp(hitBrick);
           if (this.isRedBrick(hitBrick.color)) {
@@ -651,7 +647,6 @@ constructor(canvas: HTMLCanvasElement, levelManager?: LevelManager) {
       this.brickManager.draw(this.renderer.ctx);
       this.powerUpManager.draw(this.renderer.ctx);
       this.particleSystem.draw(this.renderer.ctx);
-      this.scorePopupManager.draw(this.renderer.ctx);
       this.paddle.draw(this.renderer.ctx);
       this.balls.forEach(ball => ball.draw(this.renderer.ctx));
       this.drawLaser();
@@ -663,7 +658,6 @@ constructor(canvas: HTMLCanvasElement, levelManager?: LevelManager) {
       this.brickManager.draw(this.renderer.ctx);
       this.powerUpManager.draw(this.renderer.ctx);
       this.particleSystem.draw(this.renderer.ctx);
-      this.scorePopupManager.draw(this.renderer.ctx);
       this.paddle.draw(this.renderer.ctx);
       this.balls.forEach(ball => ball.draw(this.renderer.ctx));
       this.drawDebugInfo();
@@ -772,7 +766,6 @@ constructor(canvas: HTMLCanvasElement, levelManager?: LevelManager) {
       this.triggerShake(this.isRedBrick(brick.color) ? 4 : 2);
       this.particleSystem.spawn(brick.x + brick.width / 2, brick.y + brick.height / 2, brick.color, particleCount);
     });
-    this.scorePopupManager.spawn(this.canvas.width / 2, 100, this.brickManager.brickList.length * 10, '#ffffff');
   }
 
   private drawKilledPodDisplay(): void {
