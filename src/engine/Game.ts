@@ -43,7 +43,7 @@ export class Game {
   private lasers: Laser[] = [];
   private lastLaserTime: number = 0;
   private laserCooldown: number = 400;
-  private gameSpeed: number = 0.5;
+  private gameSpeed: number = 1.0;
   private speedDisplayTimer: number = 0;
   private speedDisplayValue: string = '';
   private killedPod: string | null = null;
@@ -409,7 +409,8 @@ constructor(canvas: HTMLCanvasElement, levelManager?: LevelManager) {
       0.6,
       config.powerUpProbabilities
     );
-    this.gameSpeed = config.gameSpeed ?? 1.0;
+    const baseSpeed = config.gameSpeed ?? 1.0;
+    this.gameSpeed = this.isMobile ? baseSpeed * 0.75 : baseSpeed * 1.7;
     this.laserCooldown = config.laserCooldown ?? 200;
     this.hasLaser = false;
     this.lasers = [];
