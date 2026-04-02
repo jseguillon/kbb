@@ -47,7 +47,8 @@ export class Ball {
     }
 
     this.trail.push({x: this.x, y: this.y, opacity: 0.6});
-    if (this.trail.length > 15) {
+    const maxTrailLength = Math.max(5, Math.floor(15 / speedMultiplier));
+    if (this.trail.length > maxTrailLength) {
       this.trail.shift();
     }
 
