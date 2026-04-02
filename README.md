@@ -1,4 +1,4 @@
-# KBB Brick Breaker Game
+# KBB - Kubernetes Brick Breaker Game
 
 A modern, browser-based brick breaker game that can destroy Pods on your Kubernetes cluster !
 
